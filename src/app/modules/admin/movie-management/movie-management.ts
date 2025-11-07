@@ -18,7 +18,7 @@ import { MessageService, ConfirmationService, Footer } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { HeaderAdminComponent } from '../header-admin/header-admin';
 import { FooterComponent } from '@shared/footer/footer';
-
+import { Supabase } from '@app/services/supabase';
 // Interfaces para tipos de datos
 interface Pelicula {
   id?: string;

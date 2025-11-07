@@ -7,7 +7,7 @@ import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
-
+import { Supabase } from '@app/services/supabase';
 @Component({
   selector: 'app-header-admin',
   standalone: true,
@@ -21,7 +21,8 @@ import { TooltipModule } from 'primeng/tooltip';
     TooltipModule
   ],
   templateUrl: './header-admin.html',
-  styleUrls: ['./header-admin.scss']
+  styleUrls: ['./header-admin.scss'],
+  providers:[Supabase]
 })
 export class HeaderAdminComponent implements OnInit {
   @Input() mostrarBotonMenu: boolean = false;
