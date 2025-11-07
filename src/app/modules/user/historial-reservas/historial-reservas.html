@@ -1,5 +1,6 @@
 <app-header></app-header>
-<div class="boleto-container">
+
+<div class="boleto-container" *ngIf="reservas?.length; else sinReservas">
   <div *ngFor="let reserva of reservas" class="boleto-wrapper">
     <!-- Stub Izquierdo -->
     <div class="boleto-stub-left">
@@ -8,9 +9,8 @@
 
     <!-- Cuerpo Principal del Boleto -->
     <div class="boleto-cine">
-      <!-- Fila Superior: Clasificación, Fecha, Hora -->
+      <!-- Fila Superior: Fecha, Hora -->
       <div class="boleto-fila-superior">
-        
         <div class="boleto-info-item">
           <span class="boleto-label">FECHA:</span>
           <span class="boleto-value">{{ formatearFecha(reserva.fechaFuncion) }}</span>
@@ -48,8 +48,26 @@
         </div>
         <div class="boleto-info-item">
           <span class="boleto-label">COSTO:</span>
-          <span class="boleto-value">${{ formatearCosto(reserva.costo || calcularCosto(reserva.asientos.length)) }}</span>
+          <span class="boleto-value">
+            ${{ formatearCosto(reserva.costo || calcularCosto(reserva.asientos.length)) }}
+          </span>
         </div>
+      </div>
+
+      <!-- Botón QR -->
+      <div class="boleto-acciones mt-4 text-center">
+        <button
+          pButton
+          label="Generar QR"
+          icon="pi pi-qrcode"
+          class="p-button-rounded p-button-outlined p-button-secondary"
+          (click)="mostrarQR(reserva.idFuncion)"
+        ></button>
+      </div>
+
+      <!-- Mostrar QR -->
+      <div *ngIf="reserva.idFuncion === idFuncionQR" class="mt-4 flex justify-center">
+        <app-qrdisplay [idFuncion]="reserva.idFuncion"></app-qrdisplay>
       </div>
     </div>
 
@@ -59,4 +77,11 @@
     </div>
   </div>
 </div>
+
+<ng-template #sinReservas>
+  <div class="p-6 text-center text-surface-500">
+    <p>No tienes reservas registradas aún.</p>
+  </div>
+</ng-template>
+
 <app-footer></app-footer>

@@ -17,5 +17,9 @@ export const routesUser: Routes = [
     {
         path: 'perfil',
         loadComponent: () => import('./perfil/perfil').then(m => m.Perfil)
-    }
+    },
+    {
+        path: 'qrdisplay',
+        loadComponent: () => import('./qrdisplay/qrdisplay').then(m => m.Qrdisplay)
+    },
 ];

@@ -1,1 +1,10 @@
-<p>qrdisplay works!</p>
+<div class="center-div" *ngIf="valor; else cargando">
+    <qrcode [qrdata]="valor" [width]="ancho" [errorCorrectionLevel]="nivel" [elementType]="'canvas'" [margin]="4"
+        [colorDark]="'#000000'" [colorLight]="'#ffffff'" [cssClass]="'qr-code'" [alt]="'QR Code'"></qrcode>
+
+    <p class="info">QR generado para la función con ID: {{ idFuncion }}</p>
+</div>
+
+<ng-template #cargando>
+    <p class="loading">Generando código QR...</p>
+</ng-template>
