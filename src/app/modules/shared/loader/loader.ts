@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-loader',
-  imports: [],
   templateUrl: './loader.html',
-  styleUrl: './loader.scss',
+  styleUrls: ['./loader.scss'],
+  imports: [CommonModule],
+  standalone: true
 })
-export class Loader {
-
+export class LoaderComponent {
+  @Input() visible: boolean = true;
 }
