@@ -1,3 +1,5 @@
+
+
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environments';
 import { createClient, SupabaseClient, Session } from '@supabase/supabase-js';
@@ -160,26 +162,30 @@ export class Supabase {
   }
 
   async getMisReservas() {
-    const { data: { user } } = await this.supabase.auth.getUser();
-    if (!user) throw new Error('Usuario no autenticado');
+    const { data: userData, error: userError } = await this.supabase.auth.getUser();
+    if (userError) throw userError;
+    const userId = userData?.user?.id;
 
     const { data, error } = await this.supabase
       .from('reservas')
       .select(`
-        *,
-        funciones (
-          fecha_hora_inicio,
-          peliculas (
-            nombre,
-            imagen
-          )
-        )
-      `)
-      .eq('id_usuario', user.id);
+      id,
+      estado,
+      asientos,
+      funciones (
+        id,
+        fecha_hora_inicio,
+        peliculas (nombre, imagen),
+        salas (codigo)
+      )
+    `)
+      .eq('id_usuario', userId)
+      .order('create_at', { ascending: false });
 
     if (error) throw error;
     return data;
   }
+
 
   async cancelarReserva(datos: any) {
     const { data, error } = await this.supabase
@@ -400,7 +406,7 @@ export class Supabase {
   async getUserRoleLinks() {
     const { data, error } = await this.supabase
       .from('usuarios_roles')
-      .select('*');
+      .select(`*`);
     if (error) throw error;
     return data;
   }
@@ -408,9 +414,48 @@ export class Supabase {
   async getPermisosRol() {
     const { data, error } = await this.supabase
       .from('permisosRol')
-      .select('*, roles(nombre), submodulos(nombre, url)');
+      .select(`*, roles(nombre), submodulos(nombre, url)`);
     if (error) throw error;
     return data;
   }
+  verificacion = {
+    verificarReservaDetallada: (
+      idUsuario: string,
+      idFuncion: number,
+      asientos: any
+    ) => this.verificarReservaDetallada(this.supabase, idUsuario, idFuncion, asientos),
+  };
+
+  async obtenerDataFuncion(idFuncion: number) {
+    const { data, error } = await this.supabase
+      .from('vista_reservas_detallada')
+      .select('*')
+      .eq('id_funcion', idFuncion);
+
+    if (error) throw error;
+    return data;
+  }
+
+  async verificarReservaDetallada(
+    supabase: SupabaseClient,
+    idUsuario: string,
+    idFuncion: number,
+    asientos: any
+  ) {
+    const { data, error } = await supabase.rpc('verificar_reserva_detallada', {
+      p_id_usuario: idUsuario,
+      p_id_funcion: idFuncion,
+      p_asientos: asientos,
+    });
+
+    if (error) throw error;
+    return data;
+  }
+  async getUsuarioActual() {
+    const { data, error } = await this.supabase.auth.getUser();
+    if (error) throw error;
+    return data.user;
+  }
+
 
 }

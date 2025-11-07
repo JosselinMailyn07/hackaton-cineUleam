@@ -1,8 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '@shared/header/header';
 import { FooterComponent } from '@shared/footer/footer';
+import { Supabase } from '@services/supabase';
+import { Qrdisplay } from '../qrdisplay/qrdisplay';
 
 type EstadoReserva = 'pendiente' | 'confirmada' | 'cancelada';
 
@@ -15,7 +17,7 @@ interface Reserva {
   id: number;
   estado: EstadoReserva;
   asientos: Asiento[];
-  idUsuario: number;
+  idUsuario: string;
   idFuncion: number;
   fechaCreacion: string;
   fechaActualizacion: string | null;
@@ -33,12 +35,68 @@ interface Reserva {
     ButtonModule,
     CommonModule,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    Qrdisplay
   ],
   templateUrl: './historial-reservas.html',
   styleUrls: ['./historial-reservas.scss'],
 })
-export class HistorialReservas {
+export class HistorialReservas implements OnInit {
+  reservas: Reserva[] = [];
+  idFuncionQR: number | null = null;
+
+  constructor(private supabase: Supabase) {}
+
+  async ngOnInit() {
+    try {
+      const { data: userData } = await this.supabase.supabase.auth.getUser();
+      const userId = userData?.user?.id;
+
+      if (!userId) return;
+
+      const { data, error } = await this.supabase.supabase
+        .from('reservas')
+        .select(`
+          id,
+          estado,
+          asientos,
+          funciones (
+            id,
+            fecha_hora_inicio,
+            peliculas (nombre, imagen),
+            salas (codigo)
+          )
+        `)
+        .eq('id_usuario', userId)
+        .order('create_at', { ascending: false });
+
+      if (error) throw error;
+
+      this.reservas = (data || []).map((r: any) => ({
+        id: r.id,
+        estado: r.estado,
+        asientos: r.asientos || [],
+        idUsuario: userId,
+        idFuncion: r.funciones?.id,
+        fechaCreacion: r.create_at,
+        fechaActualizacion: null,
+        tituloPelicula: r.funciones?.peliculas?.nombre,
+        fechaFuncion: r.funciones?.fecha_hora_inicio,
+        horarioFuncion: new Date(r.funciones?.fecha_hora_inicio).toLocaleTimeString('es-EC', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        codigoSala: r.funciones?.salas?.codigo,
+      }));
+    } catch (err) {
+      console.error('Error cargando reservas:', err);
+    }
+  }
+
+  mostrarQR(idFuncion: number) {
+    this.idFuncionQR = this.idFuncionQR === idFuncion ? null : idFuncion;
+  }
+
   calcularCosto(cantidadAsientos: number): number {
     return cantidadAsientos * 12.34;
   }
@@ -55,43 +113,4 @@ export class HistorialReservas {
   formatearCosto(costo: number): string {
     return costo.toFixed(2).replace('.', ',');
   }
-
-  @Input() reservas: Reserva[] = [
-    {
-      id: 1,
-      estado: 'pendiente',
-      asientos: [
-        { fila: 'A', numero: 1 },
-        { fila: 'A', numero: 2 },
-        { fila: 'A', numero: 3 }
-      ],
-      idUsuario: 123,
-      idFuncion: 456,
-      fechaCreacion: '2025-11-07T10:30:00',
-      fechaActualizacion: null,
-      tituloPelicula: 'Dune: Parte Dos',
-      fechaFuncion: '2025-11-10',
-      horarioFuncion: '19:30',
-      codigoSala: 'SALA-05-A',
-      costo: 37.02,
-    },
-    {
-      id: 2,
-      estado: 'confirmada',
-      asientos: [
-        { fila: 'B', numero: 4 },
-        { fila: 'B', numero: 5 }
-      ],
-      idUsuario: 123,
-      idFuncion: 789,
-      fechaCreacion: '2025-11-05T15:45:00',
-      fechaActualizacion: '2025-11-06T09:20:00',
-      tituloPelicula: 'Oppenheimer',
-      fechaFuncion: '2025-11-08',
-      horarioFuncion: '21:00',
-      codigoSala: 'SALA-03-B',
-
-      costo: 24.68,
-    }
-  ];
 }

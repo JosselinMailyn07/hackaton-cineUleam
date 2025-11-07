@@ -108,7 +108,7 @@ export class Register {
             });
 
             if (!authData.user || !authData.session) throw new Error('No se pudo crear el usuario o la sesión');
-            
+
             userId = authData.user.id; // ¡Obtenemos el UUID!
 
             // --- PASO 1.5: Establecer sesión para que RLS funcione ---
@@ -128,6 +128,9 @@ export class Register {
             await this.authService.asignarRolInicial({ userId: userId });
 
             console.log('Usuario, perfil y rol creados:', authData.user);
+            setTimeout(() => {
+                this.router.navigate(['/user/cartelera']);
+            }, 2000);
 
             // 4. Mostrar diálogo de éxito
             this.mostrarDialogoConfirmacion = true;
