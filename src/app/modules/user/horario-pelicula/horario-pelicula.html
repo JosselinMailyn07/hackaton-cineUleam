@@ -1,1 +1,62 @@
-<p>horario-pelicula works!</p>
+<p-dialog
+  header="Horarios y Reservas"
+  [(visible)]="visible"
+  (visibleChange)="visibleChange.emit($event)"
+  [style]="{ width: '500px' }"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+>
+  <div *ngIf="peliculaSeleccionada" class="p-4">
+    <h3 class="text-xl font-bold text-[var(--color-texto)] mb-4">
+      {{ peliculaSeleccionada.nombre }}
+    </h3>
+
+    <div class="mb-4">
+      <p class="text-sm text-[var(--color-texto-secundario)] mb-2">Horario:</p>
+      <p-select
+        [options]="horariosDisponibles"
+        [(ngModel)]="horarioSeleccionado"
+        placeholder="Selecciona un horario"
+        class="w-full"
+      ></p-select>
+    </div>
+
+    <div class="mb-4">
+      <p class="text-sm text-[var(--color-texto-secundario)] mb-2">Cantidad de Asientos:</p>
+      <div class="flex items-center gap-3">
+        <p-button
+          icon="pi pi-minus"
+          [rounded]="true"
+          [text]="true"
+          [disabled]="cantidadAsientos <= 1"
+          (onClick)="decrementarAsientos()"
+          class="p-button-outlined"
+        ></p-button>
+        <span class="text-lg font-semibold text-[var(--color-texto)] min-w-[3rem] text-center">
+          {{ cantidadAsientos }}
+        </span>
+        <p-button
+          icon="pi pi-plus"
+          [rounded]="true"
+          [text]="true"
+          [disabled]="cantidadAsientos >= MAX_ASIENTOS"
+          (onClick)="incrementarAsientos()"
+          class="p-button-outlined"
+        ></p-button>
+      </div>
+      <p class="text-xs text-[var(--color-texto-secundario)] mt-1">
+        Máximo {{ MAX_ASIENTOS }} asientos
+      </p>
+    </div>
+
+    <div class="flex justify-end">
+      <p-button
+        label="Reservar Asiento"
+        icon="pi pi-check"
+        class="p-button-success"
+        (onClick)="reservarAsiento()"
+      ></p-button>
+    </div>
+  </div>
+</p-dialog>  

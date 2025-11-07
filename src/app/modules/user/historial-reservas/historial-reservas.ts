@@ -36,7 +36,7 @@ interface Reserva {
     FooterComponent
   ],
   templateUrl: './historial-reservas.html',
-  styleUrl: './historial-reservas.scss',
+  styleUrls: ['./historial-reservas.scss'],
 })
 export class HistorialReservas {
   calcularCosto(cantidadAsientos: number): number {

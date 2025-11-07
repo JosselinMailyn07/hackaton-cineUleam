@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { CarouselModule } from 'primeng/carousel';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
@@ -7,6 +6,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { HeaderComponent } from '@shared/header/header';
 import { FooterComponent } from '@shared/footer/footer';
 import { LoaderComponent } from '@shared/loader/loader';
+import { HorarioPelicula } from '../horario-pelicula/horario-pelicula';
 import { User } from '@app/services/user';
 
 @Component({
@@ -19,7 +19,8 @@ import { User } from '@app/services/user';
     HeaderComponent,
     FooterComponent,
     ProgressSpinnerModule, 
-    LoaderComponent
+    LoaderComponent,
+    HorarioPelicula
   ],
   templateUrl: './cartelera.html',
   styleUrls: ['./cartelera.scss'],
@@ -30,6 +31,8 @@ export class Cartelera implements OnInit {
   peliculasProximas: any[] = [];
   
   cargando: boolean = true;
+  mostrarModalHorarios: boolean = false;
+  peliculaSeleccionada: any = null;
   private categoriasMap = new Map<number, string>();
 
   opcionesResponsivas = [
@@ -52,8 +55,7 @@ export class Cartelera implements OnInit {
 
   constructor(
     // 2. INYECTAR 'User'
-    private userService: User,
-    private router: Router
+    private userService: User
   ) { }
 
   ngOnInit(): void {
@@ -107,9 +109,10 @@ export class Cartelera implements OnInit {
   }
 
   /**
-   * Navega a la página de detalles de la película
+   * Abre el modal de horarios para la película seleccionada
    */
-  verDetalle(peliculaId: number) {
-    this.router.navigate(['/pelicula', peliculaId]);
+  verDetalle(pelicula: any) {
+    this.peliculaSeleccionada = pelicula;
+    this.mostrarModalHorarios = true;
   }
 }

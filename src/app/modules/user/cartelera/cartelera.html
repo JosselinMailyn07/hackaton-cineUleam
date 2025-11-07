@@ -53,7 +53,7 @@
               <!-- Conectado a la función verDetalle() -->
               <button pButton 
                       label="Ver detalles" 
-                      (click)="verDetalle(pelicula.id)"
+                      (click)="verDetalle(pelicula)"
                       class="p-button-primary w-auto">
               </button>
             </div>
@@ -87,7 +87,7 @@
               <p class="descripcion-pelicula">{{ pelicula.descripcion }}</p>
               <button pButton 
                       label="Ver detalles" 
-                      (click)="verDetalle(pelicula.id)"
+                      (click)="verDetalle(pelicula)"
                       class="p-button-primary w-auto">
               </button>
             </div>
@@ -98,5 +98,11 @@
 
   } <!-- Fin de @if (!cargando) -->
 </div>
+
+<!-- Modal de Horarios -->
+<app-horario-pelicula
+  [(visible)]="mostrarModalHorarios"
+  [peliculaSeleccionada]="peliculaSeleccionada">
+</app-horario-pelicula>
 
 <app-footer></app-footer>
