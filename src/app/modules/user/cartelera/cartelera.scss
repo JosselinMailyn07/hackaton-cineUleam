@@ -1,0 +1,26 @@
+:host {
+    display: block;
+  }
+  
+  .cartelera-carousel ::ng-deep .p-carousel-item {
+    padding: 1rem;
+  }
+  
+  .tarjeta-pelicula {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .tarjeta-pelicula:hover {
+    transform: translateY(-5px);
+  }
+  
+  .p-carousel-prev,
+  .p-carousel-next {
+    color: white !important;
+  }
+  
+  .p-carousel-prev:hover,
+  .p-carousel-next:hover {
+    color: #38bdf8 !important; /* cyan-400 */
+  }
+  
