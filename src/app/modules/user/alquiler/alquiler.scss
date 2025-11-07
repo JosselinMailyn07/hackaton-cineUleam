@@ -1,0 +1,11 @@
+@use 'tailwindcss' as *;
+/* Estilos adicionales para el componente */
+:host {
+  @apply block;
+}
+
+p-card.custom-card {
+  @apply border border-[var(--color-borde)];
+  @apply transition-transform duration-200 hover:scale-[1.02];
+  @apply bg-[var(--color-superficie)];
+}

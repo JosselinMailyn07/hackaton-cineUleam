@@ -9,5 +9,9 @@ export const routesUser: Routes = [
         path: 'historial-reservas',
         loadComponent: () =>
           import('./historial-reservas/historial-reservas').then(m => m.HistorialReservas)
-      }
+      },
+    {
+        path: 'alquiler',
+        loadComponent: () => import('./alquiler/alquiler').then(m => m.Alquiler)
+    }
 ];

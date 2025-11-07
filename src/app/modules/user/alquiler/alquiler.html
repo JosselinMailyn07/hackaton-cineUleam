@@ -1,1 +1,62 @@
-<p>alquiler works!</p>
+<app-header></app-header>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    <!-- Tarjeta para cada alquiler de sala -->
+    <p-card
+      *ngFor="let alquiler of alquileres"
+      class="shadow-lg rounded-lg overflow-hidden custom-card"
+    >
+      <div class="p-4">
+        <!-- Nombre de la sala -->
+        <h3 class="text-xl font-bold text-[var(--color-texto)] mb-2">
+          {{ alquiler.nombreSala }}
+        </h3>
+  
+        <!-- Tipo de evento -->
+        <div class="flex items-center mb-3">
+          <span class="text-sm text-[var(--color-texto-secundario)] mr-2">Tipo de Evento:</span>
+          <span class="px-2 py-1 rounded-full text-xs font-medium bg-[var(--color-primario)] text-white">
+            {{ alquiler.tipoEvento | uppercase }}
+          </span>
+        </div>
+  
+        <!-- Información de fecha, horario y capacidad -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <p class="text-sm text-[var(--color-texto-secundario)]">Fecha:</p>
+            <p class="font-medium text-[var(--color-texto)]">{{ alquiler.fecha }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-[var(--color-texto-secundario)]">Horario:</p>
+            <p class="font-medium text-[var(--color-texto)]">{{ alquiler.horario }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-[var(--color-texto-secundario)]">Capacidad:</p>
+            <p class="font-medium text-[var(--color-texto)]">{{ alquiler.capacidad }} personas</p>
+          </div>
+          <div>
+            <p class="text-sm text-[var(--color-texto-secundario)]">Estado:</p>
+            <p class="font-medium text-[var(--color-texto)]">
+              <span [class]="
+                alquiler.estado === 'disponible' ? 'text-[var(--color-exito)]' :
+                alquiler.estado === 'reservado' ? 'text-[var(--color-advertencia)]' :
+                'text-[var(--color-error)]'"
+              >
+                {{ alquiler.estado | uppercase }}
+              </span>
+            </p>
+          </div>
+        </div>
+  
+        <!-- Botón para alquilar -->
+        <div class="flex justify-end">
+          <p-button
+            label="Alquilar"
+            icon="pi pi-calendar-plus"
+            class="p-button-primary"
+            [disabled]="alquiler.estado !== 'disponible'"
+          ></p-button>
+        </div>
+      </div>
+    </p-card>
+  </div>
+  <app-footer></app-footer>
