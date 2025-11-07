@@ -31,18 +31,18 @@
           [text]="true"
           [disabled]="cantidadAsientos <= 1"
           (onClick)="decrementarAsientos()"
-          class="p-button-outlined"
         ></p-button>
+
         <span class="text-lg font-semibold text-[var(--color-texto)] min-w-[3rem] text-center">
           {{ cantidadAsientos }}
         </span>
+
         <p-button
           icon="pi pi-plus"
           [rounded]="true"
           [text]="true"
           [disabled]="cantidadAsientos >= MAX_ASIENTOS"
           (onClick)="incrementarAsientos()"
-          class="p-button-outlined"
         ></p-button>
       </div>
       <p class="text-xs text-[var(--color-texto-secundario)] mt-1">
@@ -59,4 +59,4 @@
       ></p-button>
     </div>
   </div>
-</p-dialog>  
+</p-dialog>

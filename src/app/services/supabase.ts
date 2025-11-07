@@ -47,14 +47,14 @@ export class Supabase {
       const { data: profileData, error: profileError } = await this.supabase
         .from('profiles')
         .select(`
-          *,
-          usuarios_roles (
-            roles (
-              id,
-              nombre
+            *,
+            usuarios_roles (
+              roles (
+                id,
+                nombre
+              )
             )
-          )
-        `)
+          `)
         .eq('id', userId)
         .single();
 
@@ -169,16 +169,16 @@ export class Supabase {
     const { data, error } = await this.supabase
       .from('reservas')
       .select(`
-      id,
-      estado,
-      asientos,
-      funciones (
         id,
-        fecha_hora_inicio,
-        peliculas (nombre, imagen),
-        salas (codigo)
-      )
-    `)
+        estado,
+        asientos,
+        funciones (
+          id,
+          fecha_hora_inicio,
+          peliculas (nombre, imagen),
+          salas (codigo)
+        )
+      `)
       .eq('id_usuario', userId)
       .order('create_at', { ascending: false });
 
@@ -209,10 +209,10 @@ export class Supabase {
     const { data, error } = await this.supabase
       .from('reservas')
       .select(`
-        *,
-        profiles ( nombres, apellidos ),
-        funciones ( peliculas ( nombre ) )
-      `)
+          *,
+          profiles ( nombres, apellidos ),
+          funciones ( peliculas ( nombre ) )
+        `)
       .order('create_at', { ascending: false }) // Más nuevas primero
       .limit(datos.limit);
     if (error) throw error;
@@ -289,14 +289,14 @@ export class Supabase {
       const { data: perfiles, error: perfilesError } = await this.supabase
         .from('profiles')
         .select(`
-          *,
-          usuarios_roles (
-            roles (
-              id,
-              nombre
+            *,
+            usuarios_roles (
+              roles (
+                id,
+                nombre
+              )
             )
-          )
-        `);
+          `);
 
       if (perfilesError) throw perfilesError;
 
@@ -456,6 +456,26 @@ export class Supabase {
     if (error) throw error;
     return data.user;
   }
+
+async getFuncionesPorPelicula(idPelicula: number) {
+  console.log(idPelicula)
+  const { data, error } = await this.supabase
+    .from('funciones')
+    .select(`
+      id,
+      id_peli,
+      fecha_hora_inicio,
+      salas (codigo, asientos, ubicacion)
+    `)
+    .eq('id_peli', idPelicula)
+    .gt('fecha_hora_inicio', new Date().toISOString())
+    .order('fecha_hora_inicio', { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
+
 
 
 }

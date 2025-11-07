@@ -1,27 +1,20 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-// PrimeNG
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
+import { Supabase } from '@app/services/supabase';
 
 @Component({
   selector: 'app-horario-pelicula',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,       // Necesario para [(ngModel)]
-    DialogModule,      // <p-dialog>
-    SelectModule,      // <p-select>
-    ButtonModule,      // <p-button>
-  ],
+  imports: [CommonModule, FormsModule, DialogModule, SelectModule, ButtonModule],
   templateUrl: './horario-pelicula.html',
   styleUrls: ['./horario-pelicula.scss']
 })
-export class HorarioPelicula {
+export class HorarioPeliculaComponent {
   @Input() visible: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();
   @Input() peliculaSeleccionada: any = null;
@@ -29,23 +22,40 @@ export class HorarioPelicula {
   horarioSeleccionado: any = null;
   cantidadAsientos: number = 1;
   MAX_ASIENTOS = 3;
+  horariosDisponibles: { label: string; value: string }[] = [];
 
-  // Horarios de ejemplo - aquí puedes cargar los horarios reales desde un servicio
-  horariosDisponibles = [
-    { label: '14:00', value: '14:00' },
-    { label: '16:30', value: '16:30' },
-    { label: '19:00', value: '19:00' },
-    { label: '21:30', value: '21:30' }
-  ];
+  constructor(
+    private messageService: MessageService,
+    private supabase: Supabase,
+  ) {}
 
-  constructor(private messageService: MessageService) {}
-
-  abrirModal(pelicula: any) {
+  async abrirModal(pelicula: any) {
     this.peliculaSeleccionada = pelicula;
     this.visible = true;
-    this.cantidadAsientos = 1; // Resetear a 1 cuando se abre el modal
-    // Aquí puedes cargar los horarios reales de la película
-    // this.cargarHorarios(pelicula.id);
+    this.cantidadAsientos = 1;
+    console.log(this.peliculaSeleccionada)
+    try {
+      // Cargar horarios reales desde Supabase
+      const funciones = await this.supabase.getFuncionesPorPelicula(pelicula.id);
+      this.horariosDisponibles = funciones.map((f: any) => ({
+        label: new Date(f.fecha_hora_inicio).toLocaleString('es-EC', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+          day: '2-digit',
+          month: 'short'
+        }),
+        value: f.id
+      }));
+    } catch (err) {
+      console.error(err);
+      this.messageService.add({
+        key: 'toast1',
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'No se pudieron cargar los horarios disponibles.'
+      });
+    }
   }
 
   cerrarModal() {
@@ -74,7 +84,7 @@ export class HorarioPelicula {
     }
   }
 
-  reservarAsiento() {
+  async reservarAsiento() {
     if (!this.horarioSeleccionado) {
       this.messageService.add({
         key: 'toast1',
@@ -84,37 +94,44 @@ export class HorarioPelicula {
       });
       return;
     }
-    
-    if (this.cantidadAsientos < 1 || this.cantidadAsientos > this.MAX_ASIENTOS) {
+
+    try {
+      const usuario = await this.supabase.getUsuarioActual();
+      if (!usuario?.id) {
+        this.messageService.add({
+          key: 'toast1',
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se encontró sesión activa.'
+        });
+        return;
+      }
+
+      const datos = {
+        id_funcion: this.horarioSeleccionado,
+        id_usuario: usuario.id,
+        cantidad_asientos: this.cantidadAsientos,
+        estado: 'pendiente'
+      };
+
+      await this.supabase.createReserva(datos);
+
       this.messageService.add({
         key: 'toast1',
-        severity: 'warn',
-        summary: 'Cantidad inválida',
-        detail: `La cantidad de asientos debe estar entre 1 y ${this.MAX_ASIENTOS}`
+        severity: 'success',
+        summary: 'Reserva exitosa',
+        detail: 'Tu reserva ha sido guardada correctamente.'
       });
-      return;
+
+      setTimeout(() => this.cerrarModal(), 1500);
+    } catch (err: any) {
+      console.error('Error al crear reserva:', err);
+      this.messageService.add({
+        key: 'toast1',
+        severity: 'error',
+        summary: 'Error',
+        detail: err?.message || 'No se pudo guardar la reserva.'
+      });
     }
-    
-    console.log('Reserva confirmada:', {
-      pelicula: this.peliculaSeleccionada?.nombre,
-      horario: this.horarioSeleccionado,
-      cantidad: this.cantidadAsientos
-    });
-    
-    // Aquí puedes agregar la lógica para guardar la reserva
-    // Ejemplo: await this.reservaService.guardarReserva(...)
-    
-    // Mostrar mensaje de éxito
-    this.messageService.add({
-      key: 'toast1',
-      severity: 'success',
-      summary: 'Reserva guardada',
-      detail: 'Tu Reserva ha sido guardada'
-    });
-    
-    // Cerrar el modal después de un breve delay
-    setTimeout(() => {
-      this.cerrarModal();
-    }, 1500);
   }
 }
