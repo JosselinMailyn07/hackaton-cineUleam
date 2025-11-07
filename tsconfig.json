@@ -5,8 +5,8 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@env": [
-        "src/environments/environment.ts"
+      "@env/*": [
+        "src/environments/*"
       ],
       "@shared/*": [
         "src/app/modules/shared/*"
