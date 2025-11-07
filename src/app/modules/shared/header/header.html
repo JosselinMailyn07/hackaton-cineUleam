@@ -2,8 +2,8 @@
     <div class="headerContent">
       <!-- Sección Izquierda - Logo y Navegación -->
       <div class="headerLeft">
+        @if (mostrarBotonMenu) {
         <button 
-          *ngIf="mostrarBotonMenu" 
           pButton 
           icon="pi pi-bars" 
           class="p-button-text p-button-plain botonMenu"
@@ -11,6 +11,7 @@
           pTooltip="Menú principal"
           tooltipPosition="bottom">
         </button>
+        }
         
         <div class="logoContainer" routerLink="/inicio">
           <div class="logoWrapper">
@@ -25,7 +26,8 @@
           <div class="logoBadge">Beta</div>
         </div>
   
-        <nav class="navegacionPrincipal" *ngIf="!esMovil">
+        @if (!esMovil) {
+        <nav class="navegacionPrincipal">
           <a 
             *ngFor="let item of itemsNavegacion"
             class="navItem"
@@ -36,16 +38,19 @@
             <span class="navIndicador"></span>
           </a>
         </nav>
+        }
       </div>
   
       <!-- Sección Central - Búsqueda y Estado -->
       <div class="headerCenter">
         <!-- Búsqueda Interactiva -->
-        <div class="buscadorContainer" *ngIf="mostrarBuscador">
+        @if (mostrarBuscador) {
+        <div class="buscadorContainer">
             <div class="buscadorWrapper" [class.buscadorExpandido]="buscadorExpandido">
               
               <!-- Estado Compacto - Solo Icono -->
-              <div class="buscadorCompacto" *ngIf="!buscadorExpandido">
+              @if (!buscadorExpandido) {
+              <div class="buscadorCompacto">
                 <button 
                   pButton 
                   icon="pi pi-search" 
@@ -55,9 +60,11 @@
                   tooltipPosition="bottom">
                 </button>
               </div>
+              }
           
               <!-- Estado Expandido - Input Completo -->
-              <div class="buscadorExpandidoContent" *ngIf="buscadorExpandido">
+              @if (buscadorExpandido) {
+              <div class="buscadorExpandidoContent">
                 <div class="buscadorInputGroup">
                   <span class="p-input-icon-left iconoBusqueda">
                     <i class="pi pi-search"></i>
@@ -86,7 +93,8 @@
                 </div>
           
                 <!-- Sugerencias -->
-                <div class="sugerenciasWrapper" *ngIf="mostrarSugerencias && terminoBusqueda && sugerencias.length > 0">
+                @if (mostrarSugerencias && terminoBusqueda && sugerencias.length > 0) {
+                <div class="sugerenciasWrapper">
                   <div class="sugerenciasContainer">
                     <div class="sugerenciaHeader">
                       <span class="sugerenciaTitulo">Sugerencias</span>
@@ -117,16 +125,20 @@
                     </div>
                   </div>
                 </div>
+                }
               </div>
+              }
             </div>
           
             <!-- Overlay para cerrar búsqueda al hacer clic fuera -->
+            @if (buscadorExpandido && mostrarSugerencias) {
             <div 
               class="buscadorOverlay" 
-              *ngIf="buscadorExpandido && mostrarSugerencias"
               (click)="contraerBuscador()">
             </div>
+            }
           </div>
+          }
   
         <!-- Indicadores de Estado -->
         <!-- <div class="indicadoresContainer" *ngIf="!esMovil">
@@ -144,7 +156,8 @@
       <!-- Sección Derecha - Usuario y Acciones -->
       <div class="headerRight">
           <!-- Notificaciones -->
-        <div class="accionesRapidas" *ngIf="usuarioLogueado && !esMovil">
+        @if (usuarioLogueado && !esMovil) {
+        <div class="accionesRapidas">
           <button 
             pButton 
             icon="pi pi-bell" 
@@ -152,9 +165,11 @@
             (click)="alternarNotificaciones()"
             pTooltip="Notificaciones"
             tooltipPosition="bottom">
-            <span class="badgeNotificacion" *ngIf="notificacionesNoLeidas > 0">
+            @if (notificacionesNoLeidas > 0) {
+            <span class="badgeNotificacion">
               {{ notificacionesNoLeidas }}
             </span>
+            }
           </button>
   
           <!-- Carrito/Reservas -->
@@ -167,6 +182,7 @@
             routerLink="/reservas">
           </button> -->
         </div>
+        }
   
         <!-- Modo Oscuro/Claro -->
             <!-- <button 
@@ -178,24 +194,37 @@
           tooltipPosition="bottom">
             </button> -->
   
-        <!-- Información de Usuario -->
-        <div class="usuarioContainer" *ngIf="usuarioLogueado">
-          <p-menu #menu [model]="itemsMenu" [popup]="true" styleClass="menuUsuario"></p-menu>
-          
-          <div class="usuarioInfo" (click)="menu.toggle($event)">
-            <div class="avatarUsuario">
-              <span class="avatarIniciales">{{ obtenerIniciales(usuarioLogueado.nombre) }}</span>
-            </div>
-            <div class="usuarioDetalles" *ngIf="!esMovil">
-              <span class="usuarioNombre">{{ usuarioLogueado.nombre }}</span>
-              <span class="usuarioRol">{{ usuarioLogueado.rol }}</span>
-            </div>
-            <i class="pi pi-chevron-down usuarioDropdown"></i>
-          </div>
-          </div>
+       <!-- En el header, reemplaza la sección del usuario -->
+@if (usuarioLogueado) {
+<div class="usuarioCompacto">
+    <p-menu 
+      #menu 
+      [model]="itemsMenu" 
+      [popup]="true" 
+      styleClass="menuUsuarioSuperior"
+      [appendTo]="'body'">
+    </p-menu>
+    
+    <button 
+      pButton 
+      class="p-button-text p-button-plain botonUsuario"
+      (click)="menu.toggle($event)">
+      <div class="avatarMini">
+        {{ obtenerIniciales(usuarioLogueado.nombre) }}
+      </div>
+      @if (!esMovilPequena) {
+      <span class="usuarioNombreMini">
+        {{ usuarioLogueado.nombre.split(' ')[0] }}
+      </span>
+      }
+      <i class="pi pi-chevron-down iconoDropdown"></i>
+    </button>
+  </div>
+  }
   
         <!-- Estado de Login -->
-        <div class="accionesLogin" *ngIf="!usuarioLogueado">
+        @if (!usuarioLogueado) {
+        <div class="accionesLogin">
             <button 
               pButton 
             label="Iniciar Sesión" 
@@ -209,21 +238,24 @@
             routerLink="/registro">
             </button>
           </div>
+          }
   
         <!-- Menú móvil -->
+          @if (esMovil) {
           <button 
-            *ngIf="esMovil" 
             pButton 
             icon="pi pi-ellipsis-v" 
             class="p-button-text p-button-plain botonMenuMovil"
           (click)="menuMovil.toggle($event)">
           </button>
+          }
           <p-menu #menuMovil [model]="itemsMenuMovil" [popup]="true"></p-menu>
         </div>
       </div>
    
     <!-- Panel de Notificaciones -->
-    <div class="panelNotificaciones" *ngIf="mostrarPanelNotificaciones">
+    @if (mostrarPanelNotificaciones) {
+    <div class="panelNotificaciones">
       <div class="panelHeader">
         <h3>Notificaciones</h3>
         <button 
@@ -242,7 +274,8 @@
             <p class="notificacionTitulo">{{ notificacion.titulo }}</p>
             <p class="notificacionTiempo">{{ notificacion.tiempo }}</p>
           </div>
+          </div>
         </div>
       </div>
-    </div>
-  </header>
+      }
+    </header>

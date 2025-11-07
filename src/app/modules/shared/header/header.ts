@@ -28,20 +28,25 @@ export class HeaderComponent implements OnInit {
   @Input() mostrarBuscador: boolean = true;
   @Output() menuAlternado = new EventEmitter<void>();
   
-  // Estados reactivos
+  @ViewChild('buscadorInput') buscadorInput!: ElementRef;
+
+  // Estados responsive
   terminoBusqueda: string = '';
   buscadorExpandido: boolean = false;
-  mostrarSugerencias: boolean = false;
   mostrarPanelNotificaciones: boolean = false;
-  modoOscuro: boolean = false;
-  esMovil: boolean = false;
+  mostrarSugerencias: boolean = false;
   preventClose: boolean = false;
-  
-  @ViewChild('buscadorInput') buscadorInput!: ElementRef<HTMLInputElement>;
-  
+  menuAbierto: boolean = false;
+
+  // Detección de viewport
+  esMovil: boolean = false;
+  esMovilPequena: boolean = false;
+  esTablet: boolean = false;
+  esDesktop: boolean = false;
+
   // Datos de usuario
   usuarioLogueado: any = null;
-  
+
   // Datos de ejemplo
   itemsNavegacion = [
     { texto: 'Cartelera', icono: 'pi pi-play', ruta: '/cartelera' },
@@ -75,15 +80,11 @@ export class HeaderComponent implements OnInit {
       titulo: 'Nuevo estreno: Dune: Part Two',
       tiempo: 'Hace 1 día',
       icono: 'pi pi-star'
-    },
-    {
-      titulo: 'Promoción especial para estudiantes',
-      tiempo: 'Hace 2 días',
-      icono: 'pi pi-tag'
     }
   ];
 
   notificacionesNoLeidas = 2;
+ 
 
   itemsMenu: MenuItem[] = [];
   itemsMenuMovil: MenuItem[] = [];
@@ -97,10 +98,28 @@ export class HeaderComponent implements OnInit {
   @HostListener('window:resize')
   onResize() {
     this.verificarViewport();
+    
+    // Cerrar búsqueda si se cambia a móvil pequeña
+    if (this.esMovilPequena && this.buscadorExpandido) {
+      this.contraerBuscador();
+    }
   }
 
   verificarViewport() {
-    this.esMovil = window.innerWidth < 768;
+    const width = window.innerWidth;
+    
+    this.esMovilPequena = width < 480;  // Móviles pequeños
+    this.esMovil = width < 768;         // Todos los móviles
+    this.esTablet = width >= 768 && width < 1024; // Tablets
+    this.esDesktop = width >= 1024;     // Desktop
+
+    console.log('Viewport detectado:', {
+      movilPequena: this.esMovilPequena,
+      movil: this.esMovil,
+      tablet: this.esTablet,
+      desktop: this.esDesktop,
+      width: width
+    });
   }
 
   inicializarUsuario() {
@@ -113,155 +132,300 @@ export class HeaderComponent implements OnInit {
   }
 
   configurarMenus() {
-    // Menú de usuario desktop
+    // Menú de usuario principal
     this.itemsMenu = [
       {
         label: 'Mi Perfil',
         icon: 'pi pi-user',
-        routerLink: '/perfil'
+        routerLink: '/perfil',
+        command: () => this.cerrarMenuUsuario()
       },
       {
         label: 'Mis Reservas',
         icon: 'pi pi-ticket',
-        routerLink: '/reservas'
+        routerLink: '/reservas',
+        command: () => this.cerrarMenuUsuario()
       },
       {
         label: 'Historial',
         icon: 'pi pi-history',
-        routerLink: '/historial'
+        routerLink: '/historial',
+        command: () => this.cerrarMenuUsuario()
       },
       {
         label: 'Configuración',
         icon: 'pi pi-cog',
-        routerLink: '/configuracion'
+        routerLink: '/configuracion',
+        command: () => this.cerrarMenuUsuario()
       },
-      { separator: true },
+      { 
+        separator: true 
+      },
       {
         label: 'Cerrar Sesión',
         icon: 'pi pi-sign-out',
-        command: () => this.cerrarSesion(),
-        styleClass: 'text-red-500'
+        command: () => {
+          this.cerrarMenuUsuario();
+          this.cerrarSesion();
+        }
       }
     ];
 
-    // Menú móvil
+    // Menú móvil optimizado para pantallas pequeñas
     this.itemsMenuMovil = [
-      ...this.itemsNavegacion.map(item => ({
-        label: item.texto,
-        icon: item.icono,
-        routerLink: item.ruta
-      })),
+      {
+        label: 'Cartelera',
+        icon: 'pi pi-play',
+        routerLink: '/cartelera',
+        command: () => this.cerrarMenuMovil()
+      },
+      {
+        label: 'Estrenos',
+        icon: 'pi pi-star',
+        routerLink: '/estrenos',
+        command: () => this.cerrarMenuMovil()
+      },
+      {
+        label: 'Próximamente',
+        icon: 'pi pi-calendar',
+        routerLink: '/proximamente',
+        command: () => this.cerrarMenuMovil()
+      },
       { separator: true },
-      ...this.itemsMenu
+      {
+        label: 'Mi Perfil',
+        icon: 'pi pi-user',
+        routerLink: '/perfil',
+        command: () => this.cerrarMenuMovil()
+      },
+      {
+        label: 'Mis Reservas',
+        icon: 'pi pi-ticket',
+        routerLink: '/reservas',
+        command: () => this.cerrarMenuMovil()
+      },
+      { separator: true },
+      {
+        label: 'Configuración',
+        icon: 'pi pi-cog',
+        routerLink: '/configuracion',
+        command: () => this.cerrarMenuMovil()
+      },
+      {
+        label: 'Cerrar Sesión',
+        icon: 'pi pi-sign-out',
+        command: () => {
+          this.cerrarMenuMovil();
+          this.cerrarSesion();
+        }
+      }
     ];
   }
 
-  // Métodos interactivos
+  // Métodos para móvil pequeña
+  expandirBuscador() {
+    this.buscadorExpandido = true;
+    this.mostrarSugerencias = true;
+    
+    // En móvil pequeña, mostrar overlay completo
+    if (this.esMovilPequena) {
+      document.body.style.overflow = 'hidden';
+    }
+    
+    // Enfocar el input después de la animación
+    setTimeout(() => {
+      if (this.buscadorInput) {
+        this.buscadorInput.nativeElement.focus();
+      }
+    }, 150);
+  }
+
+  contraerBuscador() {
+    this.buscadorExpandido = false;
+    this.mostrarSugerencias = false;
+    this.terminoBusqueda = '';
+    
+    // Restaurar scroll en móvil pequeña
+    if (this.esMovilPequena) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  onBuscarInput() {
+    // Filtrar sugerencias basado en el término de búsqueda
+    if (this.terminoBusqueda.trim().length > 0) {
+      this.filtrarSugerencias();
+    } else {
+      this.sugerencias = [];
+    }
+  }
+
+  onBuscarBlur() {
+    // En móvil pequeña, no cerrar inmediatamente para permitir selección
+    const delay = this.esMovilPequena ? 500 : 200;
+    
+    setTimeout(() => {
+      if (!this.preventClose) {
+        this.contraerBuscador();
+      }
+    }, delay);
+  }
+
+  prevenirBlur(event: MouseEvent) {
+    event.preventDefault();
+    this.preventClose = true;
+    
+    setTimeout(() => {
+      this.preventClose = false;
+    }, 400);
+  }
+
+  filtrarSugerencias() {
+    const term = this.terminoBusqueda.toLowerCase();
+    const todasSugerencias = [
+      'Avengers: Endgame',
+      'The Batman', 
+      'Spider-Man: No Way Home',
+      'Dune: Part Two',
+      'Acción',
+      'Comedia',
+      'Drama',
+      'Terror',
+      'Ciencia Ficción',
+      'Avatar',
+      'Star Wars',
+      'Harry Potter'
+    ];
+    
+    this.sugerencias = todasSugerencias.filter(sugerencia =>
+      sugerencia.toLowerCase().includes(term)
+    ).slice(0, this.esMovilPequena ? 3 : 5); // Menos sugerencias en móvil pequeña
+  }
+
+  seleccionarSugerencia(sugerencia: string) {
+    this.terminoBusqueda = sugerencia;
+    this.realizarBusqueda();
+  }
+
+  realizarBusqueda() {
+    if (this.terminoBusqueda.trim()) {
+      console.log('Buscando:', this.terminoBusqueda);
+      // Aquí iría la navegación a resultados de búsqueda
+      this.contraerBuscador();
+      
+      // En móvil pequeña, mostrar feedback táctil
+      if (this.esMovilPequena) {
+        this.mostrarFeedbackBusqueda();
+      }
+    }
+  }
+
+  mostrarFeedbackBusqueda() {
+    // Feedback visual para móviles pequeños
+    const button = document.querySelector('.botonBuscarCompacto');
+    if (button) {
+      button.classList.add('busquedaRealizada');
+      setTimeout(() => {
+        button.classList.remove('busquedaRealizada');
+      }, 1000);
+    }
+  }
+
+  // Métodos del menú usuario
+  onMenuToggle(event: any) {
+    this.menuAbierto = !this.menuAbierto;
+    
+    // En móvil pequeña, ajustar posición del menú
+    if (this.esMovilPequena) {
+      setTimeout(() => this.ajustarMenuMovil(), 0);
+    }
+  }
+
+  ajustarMenuMovil() {
+    const menuOverlay = document.querySelector('.p-menu-overlay');
+    if (menuOverlay) {
+      const rect = menuOverlay.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      
+      // Asegurar que el menú no se salga de la pantalla
+      if (rect.bottom > viewportHeight) {
+        const menuElement = menuOverlay as HTMLElement;
+        menuElement.style.top = 'auto';
+        menuElement.style.bottom = '100%';
+      }
+    }
+  }
+
+  cerrarMenuUsuario() {
+    this.menuAbierto = false;
+  }
+
+  cerrarMenuMovil() {
+    // Cerrar menú móvil
+    this.menuAbierto = false;
+  }
+
   alternarMenu() {
     this.menuAlternado.emit();
   }
 
- // Métodos para la búsqueda
-expandirBuscador() {
-  this.buscadorExpandido = true;
-  this.mostrarSugerencias = true;
-  
-  // Enfocar el input después de la animación
-  setTimeout(() => {
-    if (this.buscadorInput) {
-      this.buscadorInput.nativeElement.focus();
+  alternarNotificaciones() {
+    this.mostrarPanelNotificaciones = !this.mostrarPanelNotificaciones;
+    if (this.mostrarPanelNotificaciones) {
+      this.notificacionesNoLeidas = 0;
+      
+      // En móvil pequeña, ajustar panel de notificaciones
+      if (this.esMovilPequena) {
+        setTimeout(() => this.ajustarPanelNotificaciones(), 0);
+      }
     }
-  }, 150);
-}
-contraerBuscador() {
-  this.buscadorExpandido = false;
-  this.mostrarSugerencias = false;
-  this.terminoBusqueda = '';
-}
-onBuscarInput() {
-  // Filtrar sugerencias basado en el término de búsqueda
-  if (this.terminoBusqueda.trim().length > 0) {
-    this.filtrarSugerencias();
-  } else {
-    this.sugerencias = [];
   }
-}
 
-onBuscarBlur() {
-  // Pequeño delay para permitir clicks en sugerencias
-  setTimeout(() => {
-    if (!this.preventClose) {
-      this.contraerBuscador();
+  ajustarPanelNotificaciones() {
+    const panel = document.querySelector('.panelNotificacionesMovil');
+    if (panel) {
+      const panelElement = panel as HTMLElement;
+      panelElement.style.height = 'calc(100vh - 60px)'; // Ajustar altura
     }
-  }, 200);
-}
-prevenirBlur(event: MouseEvent) {
-  event.preventDefault();
-  this.preventClose = true;
-  
-  setTimeout(() => {
-    this.preventClose = false;
-  }, 300);
-}
-
-filtrarSugerencias() {
-  const term = this.terminoBusqueda.toLowerCase();
-  const todasSugerencias = [
-    'Avengers: Endgame',
-    'The Batman', 
-    'Spider-Man: No Way Home',
-    'Dune: Part Two',
-    'Acción',
-    'Comedia',
-    'Drama',
-    'Terror',
-    'Ciencia Ficción'
-  ];
-  
-  this.sugerencias = todasSugerencias.filter(sugerencia =>
-    sugerencia.toLowerCase().includes(term)
-  ).slice(0, 5); // Limitar a 5 sugerencias
-}
-alternarNotificaciones() {
-  this.mostrarPanelNotificaciones = !this.mostrarPanelNotificaciones;
-  if (this.mostrarPanelNotificaciones) {
-    this.notificacionesNoLeidas = 0;
   }
-}
 
-cerrarNotificaciones() {
-  this.mostrarPanelNotificaciones = false;
-}
+  cerrarNotificaciones() {
+    this.mostrarPanelNotificaciones = false;
+  }
 
-seleccionarSugerencia(sugerencia: string) {
-  this.terminoBusqueda = sugerencia;
-  this.realizarBusqueda();
-}
-
-obtenerIniciales(nombre: string): string {
-  return nombre
+  obtenerIniciales(nombre: string): string {
+    return nombre
       .split(' ')
       .map(n => n[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);
-}
-trackBySugerencia(index: number, sugerencia: string): string {
-  return sugerencia;
-}
-
-realizarBusqueda() {
-  if (this.terminoBusqueda.trim()) {
-    console.log('Buscando:', this.terminoBusqueda);
-    // Navegar a página de resultados
-    this.contraerBuscador();
   }
-}
-cerrarSesion() {
-  // Lógica para cerrar sesión
-  console.log('Cerrando sesión...');
-  this.usuarioLogueado = null;
-  // Aquí se podría llamar a un servicio de autenticación
-  // Ejemplo: this.authService.logout();
-}
+
+  cerrarSesion() {
+    console.log('Cerrando sesión...');
+    this.usuarioLogueado = null;
+    
+    // Feedback visual para móvil pequeña
+    if (this.esMovilPequena) {
+      this.mostrarFeedbackCerrarSesion();
+    }
+  }
+
+  mostrarFeedbackCerrarSesion() {
+    // Podrías mostrar un toast o mensaje de confirmación
+    console.log('Sesión cerrada - Redirigiendo...');
+  }
+
+  trackBySugerencia(index: number, sugerencia: string): string {
+    return sugerencia;
+  }
+
+  // Método para obtener el tipo de dispositivo (útil para debugging)
+  getTipoDispositivo(): string {
+    if (this.esMovilPequena) return 'Móvil Pequeño';
+    if (this.esMovil) return 'Móvil';
+    if (this.esTablet) return 'Tablet';
+    return 'Desktop';
+  }
 }

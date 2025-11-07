@@ -1,17 +1,17 @@
 import { Routes } from '@angular/router';
-import { Dashboard } from './dashboard/dashboard';
-import { MovieManagement } from './movie-management/movie-management';
+import { DashboardComponent } from './dashboard/dashboard';
+import { MovieManagementComponent } from './movie-management/movie-management';
 import { UserManagement } from './user-management/user-management';
 import { Report } from './report/report';
 
 export const routesAdmin: Routes = [
     {
         path: 'dashboard',
-        loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard),
+        loadComponent: () => import('./dashboard/dashboard').then(m => m.DashboardComponent),
     },
     {
         path: 'movie-management',
-        loadComponent: () => import('./movie-management/movie-management').then(m => m.MovieManagement),
+        loadComponent: () => import('./movie-management/movie-management').then(m => m.MovieManagementComponent),
     },
     {
         path: 'user-management',

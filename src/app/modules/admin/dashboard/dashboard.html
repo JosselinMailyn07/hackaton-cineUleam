@@ -1,4 +1,141 @@
 
 <app-header></app-header>
-<p>prueba espacio de contenido ok </p>
-<app-footer></app-footer>
+
+
+<div class="dashboardContainer">
+    <!-- Header del Dashboard -->
+    <div class="dashboardHeader">
+      <h1 class="dashboardTitulo">Dashboard de Administración</h1>
+      <p class="dashboardDescripcion">Resumen general del sistema Cine ULEAM 4.0</p>
+    </div>
+  
+    <!-- Tarjetas de Estadísticas Principales -->
+    <div class="estadisticasGrid">
+      <div 
+        *ngFor="let estadistica of estadisticasPrincipales" 
+        class="estadisticaCard"
+        [style.border-left-color]="estadistica.color">
+        
+        <div class="estadisticaIcono" [style.background]="estadistica.color">
+          <i [class]="estadistica.icono"></i>
+        </div>
+        
+        <div class="estadisticaContenido">
+          <h3 class="estadisticaValor">{{ estadistica.valor | number }}</h3>
+          <p class="estadisticaTitulo">{{ estadistica.titulo }}</p>
+          <span class="estadisticaDescripcion">{{ estadistica.descripcion }}</span>
+          
+          <div 
+            *ngIf="estadistica.variacion" 
+            class="variacionIndicador"
+            [class.variacionPositiva]="estadistica.variacion > 0"
+            [class.variacionNegativa]="estadistica.variacion < 0">
+            <i 
+              class="pi" 
+              [class.pi-arrow-up]="estadistica.variacion > 0" 
+              [class.pi-arrow-down]="estadistica.variacion < 0">
+            </i>
+            {{ estadistica.variacion }}%
+          </div>
+        </div>
+      </div>
+    </div>
+   <!-- Acciones Rápidas y Contenido Reciente -->
+   <div class="accionesGrid">
+    <!-- Acciones Rápidas -->
+    <div class="accionesCard">
+      <p-card header="Acciones Rápidas">
+        <div class="accionesLista">
+          <button 
+            pButton 
+            label="Gestionar Películas" 
+            icon="pi pi-film" 
+            class="p-button-primary botonAccion"
+            routerLink="/admin/gestion-peliculas">
+          </button>
+          
+          <button 
+            pButton 
+            label="Programar Funciones" 
+            icon="pi pi-calendar" 
+            class="p-button-secondary botonAccion"
+            routerLink="/admin/gestion-funciones">
+          </button>
+          
+          <button 
+            pButton 
+            label="Ver Reportes" 
+            icon="pi pi-chart-bar" 
+            class="p-button-help botonAccion"
+            routerLink="/admin/reportes">
+          </button>
+          
+          <button 
+            pButton 
+            label="Gestionar Usuarios" 
+            icon="pi pi-users" 
+            class="p-button-info botonAccion"
+            routerLink="/admin/gestion-usuarios">
+          </button>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Películas Recientes -->
+    <div class="recientesCard">
+      <p-card header="Películas Recientes">
+        <div class="recientesLista">
+          <div 
+            *ngFor="let pelicula of peliculasRecientes" 
+            class="peliculaReciente">
+            
+            <img 
+              [src]="pelicula.imagen" 
+              [alt]="pelicula.titulo"
+              class="peliculaImagen">
+            
+            <div class="peliculaInfo">
+              <h4 class="peliculaTitulo">{{ pelicula.titulo }}</h4>
+              <p class="peliculaFecha">Estreno: {{ pelicula.fechaEstreno }}</p>
+              <span 
+                class="estadoBadge" 
+                [class.estado-activa]="pelicula.estado === 'activa'"
+                [class.estado-inactiva]="pelicula.estado === 'inactiva'">
+                {{ pelicula.estado | titlecase }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="verTodoContainer">
+          <button 
+            pButton 
+            label="Ver Todas las Películas" 
+            icon="pi pi-arrow-right" 
+            class="p-button-text botonVerTodo"
+            routerLink="/admin/gestion-peliculas">
+          </button>
+        </div>
+      </p-card>
+    </div>
+  </div>
+    <!-- Sección de Gráficos y Métricas -->
+    <div class="metricasGrid">
+      <!-- Gráfico de Reservas -->
+      <div class="metricaCard">
+        <p-card header="Reservas Semanales" class="graficoCard">
+          <p-chart 
+            type="line" 
+            [data]="datosGraficoReservas" 
+            [options]="opcionesGrafico" 
+            height="300px">
+          </p-chart>
+        </p-card>
+      </div>
+  
+     
+    </div>
+  
+   
+  </div>
+  <app-footer></app-footer>
