@@ -1,0 +1,48 @@
+.logoContainer {
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    position: relative;
+    
+    &:hover {
+      transform: translateY(-2px);
+      
+      .logoIcono {
+        transform: scale(1.1);
+        color: var(--color-primario);
+      }
+    }
+  }
+  
+  .logoWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .logoIcono {
+    font-size: 2rem;
+    color: var(--color-primario);
+    transition: all 0.3s ease;
+  }
+  
+  .logoTexto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+  
+  .logoTitulo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--color-texto);
+    letter-spacing: -0.5px;
+  }
+  
+  .logoVersion {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-primario);
+    margin-top: -2px;
+  }
+  

@@ -1,1 +1,74 @@
-<p>login works!</p>
+
+@if (cargar) {
+    <app-loader [visible]="cargar"></app-loader>
+  }
+  @if (bloquear_pantalla) {
+    <div class="overlay"></div>
+  }
+  
+  <div class="login-page flex items-center justify-center min-h-screen bg-login relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#e30614]/10 to-[#343434]/10 blur-3xl"></div>
+  
+    <div class="login-card relative z-10 w-full max-w-md p-8 rounded-3xl shadow-2xl bg-surface/90 backdrop-blur-xl border border-surface-400/30 dark:border-surface-700/30">
+        <div class="flex items-center justify-center">
+            <div class="logoContainer w-32 h-32">
+              <div class="logoWrapper">
+                <div class="logoIcono">
+                  <i class="pi pi-play-circle"></i>
+                </div>
+                <div class="logoTexto">
+                  <span class="logoTitulo">Cine ULEAM</span>
+                  <span class="logoVersion">4.0</span>
+                </div>
+              </div>
+              <div class="logoBadge">Beta</div>
+            </div>
+          </div>
+  
+      <h1 class="text-3xl font-bold text-center text-surface-950 dark:text-surface-0 mb-2">Inicio de sesión</h1>
+      <p class="text-center text-surface-500 dark:text-white/60 mb-8">
+        Ingrese su usuario y contraseña
+      </p>
+  
+      <form [formGroup]="loginForm" (ngSubmit)="iniciarSesion()" class="space-y-6">
+        <div>
+          <label for="email" class="block font-medium text-surface-500 dark:text-white/70 mb-1">Correo</label>
+          <input
+            id="email"
+            name="email"
+            formControlName="usuario"
+            pInputText
+            type="text"
+            class="w-full rounded-lg border border-color-borde bg-white/70 dark:bg-surface-800/70 text-surface-900 dark:text-white placeholder:text-surface-400 px-4 py-2 focus:ring-2 focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)] transition"
+          />
+        </div>
+  
+        <div>
+          <label for="password" class="block font-medium text-surface-500 dark:text-white/70 mb-1">Contraseña</label>
+          <input
+            id="password"
+            name="password"
+            formControlName="password"
+            type="password"
+            pInputText
+            class="w-full rounded-lg border border-color-borde bg-white/70 dark:bg-surface-800/70 text-surface-900 dark:text-white placeholder:text-surface-400 px-4 py-2 focus:ring-2 focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)] transition"
+          />
+          <a routerLink="" class="block mt-2 text-sm font-semibold text-[var(--color-primario)] hover:text-[var(--color-primario-hover)] transition">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+  
+        <p-button type="submit" styleClass="w-full p-button-primary" rounded>
+          Iniciar sesión
+        </p-button>
+  
+        <div class="text-center text-sm mt-8">
+          <span class="text-surface-500 dark:text-white/60">¿No estás registrado?</span>
+          <a routerLink="/auth/register" class="text-[var(--color-primario)] font-semibold hover:text-[var(--color-primario-hover)] ml-1 transition">
+            Crear una cuenta
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+  

@@ -1,1 +1,137 @@
-<p>register works!</p>
+@if (cargar) {
+    <app-loader [visible]="cargar"></app-loader>
+  }
+  @if (bloquear_pantalla) {
+    <div class="overlay"></div>
+  }
+  
+  <div class="register-page flex items-center justify-center min-h-screen bg-login relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#e30614]/10 to-[#343434]/10 blur-3xl"></div>
+  
+    <div class="register-card relative z-10 w-full max-w-md p-8 rounded-3xl shadow-2xl bg-surface/90 backdrop-blur-xl border border-surface-400/30 dark:border-surface-700/30">
+      
+      <!-- Foto de perfil con botón de editar -->
+      <div class="flex flex-col items-center mb-8">
+        <div class="relative">
+          <div class="w-24 h-24 rounded-full bg-surface-0 dark:bg-surface-700 flex items-center justify-center overflow-hidden border-2 border-white dark:border-surface-800 shadow-lg">
+            @if (fotoPerfil) {
+              <img [src]="fotoPerfil" alt="Foto de perfil" class="w-full h-full object-cover">
+            } @else {
+              <i class="pi pi-user text-4xl text-surface-400 dark:text-surface-500"></i>
+            }
+          </div>
+          <button 
+            type="button" 
+            (click)="seleccionarFoto()"
+            class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-[var(--color-primario)] text-white flex items-center justify-center shadow-lg hover:bg-[var(--color-primario-hover)] transition">
+            <i class="pi pi-pencil text-sm"></i>
+          </button>
+          <input 
+            type="file" 
+            #fileInput 
+            (change)="onFileSelected($event)"
+            accept="image/*" 
+            class="hidden">
+        </div>
+      </div>
+  
+      <h1 class="text-3xl font-bold text-center text-surface-950 dark:text-surface-0 mb-2">Crear cuenta</h1>
+      <p class="text-center text-surface-500 dark:text-white/60 mb-8">
+        Completa tus datos para registrarte
+      </p>
+  
+      <form [formGroup]="registroForm" (ngSubmit)="registrarUsuario()" class="space-y-4">
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="nombres" class="block font-medium text-surface-500 dark:text-white/70 mb-1">Nombres</label>
+            <input
+              id="nombres"
+              formControlName="nombres"
+              pInputText
+              type="text"
+              class="w-full rounded-lg border border-color-borde bg-white/70 dark:bg-surface-800/70 text-surface-900 dark:text-white placeholder:text-surface-400 px-4 py-2 focus:ring-2 focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)] transition"
+            />
+          </div>
+  
+          <div>
+            <label for="apellidos" class="block font-medium text-surface-500 dark:text-white/70 mb-1">Apellidos</label>
+            <input
+              id="apellidos"
+              formControlName="apellidos"
+              pInputText
+              type="text"
+              class="w-full rounded-lg border border-color-borde bg-white/70 dark:bg-surface-800/70 text-surface-900 dark:text-white placeholder:text-surface-400 px-4 py-2 focus:ring-2 focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)] transition"
+            />
+          </div>
+        </div>
+  
+        <div>
+          <label for="email" class="block font-medium text-surface-500 dark:text-white/70 mb-1">Correo electrónico</label>
+          <input
+            id="email"
+            formControlName="email"
+            pInputText
+            type="email"
+            class="w-full rounded-lg border border-color-borde bg-white/70 dark:bg-surface-800/70 text-surface-900 dark:text-white placeholder:text-surface-400 px-4 py-2 focus:ring-2 focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)] transition"
+          />
+        </div>
+  
+        <div>
+          <label for="telefono" class="block font-medium text-surface-500 dark:text-white/70 mb-1">Teléfono</label>
+          <input
+            id="telefono"
+            formControlName="telefono"
+            pInputText
+            type="tel"
+            class="w-full rounded-lg border border-color-borde bg-white/70 dark:bg-surface-800/70 text-surface-900 dark:text-white placeholder:text-surface-400 px-4 py-2 focus:ring-2 focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)] transition"
+          />
+        </div>
+  
+        <div>
+          <label for="password" class="block font-medium text-surface-500 dark:text-white/70 mb-1">Contraseña</label>
+          <p-password 
+            id="password"
+            formControlName="password" 
+            [toggleMask]="true" 
+            [feedback]="true"
+            strongLabel="Fuerte" mediumLabel="Debil" weakLabel="Muy débil"
+            inputStyleClass="w-full rounded-lg border border-color-borde bg-white/70 dark:bg-surface-800/70 text-surface-900 dark:text-white placeholder:text-surface-400 px-4 py-2 focus:ring-2 focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)] transition"
+            styleClass="w-full">
+          </p-password>
+        </div>
+  
+        <div>
+          <label for="confirmarPassword" class="block font-medium text-surface-500 dark:text-white/70 mb-1">Confirmar contraseña</label>
+          <p-password 
+            id="confirmarPassword"
+            formControlName="confirmarPassword" 
+            [toggleMask]="true" 
+            [feedback]="false" 
+            inputStyleClass="w-full rounded-lg border border-color-borde bg-white/70 dark:bg-surface-800/70 text-surface-900 dark:text-white placeholder:text-surface-400 px-4 py-2 focus:ring-2 focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)] transition"
+            styleClass="w-full">
+          </p-password>
+          @if (registroForm.hasError('passwordMismatch') && registroForm.get('confirmarPassword')?.touched) {
+            <small class="text-red-500 text-sm mt-1">
+              Las contraseñas no coinciden
+            </small>
+          }
+        </div>
+  
+        <p-button 
+          type="submit" 
+          styleClass="w-full p-button-primary mt-4" 
+          [disabled]="registroForm.invalid"
+          rounded>
+          Registrarse
+        </p-button>
+  
+        <div class="text-center text-sm mt-6">
+          <span class="text-surface-500 dark:text-white/60">¿Ya tienes una cuenta?</span>
+          <a routerLink="/auth/login" class="text-[var(--color-primario)] font-semibold hover:text-[var(--color-primario-hover)] ml-1 transition">
+            Inicia sesión
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
