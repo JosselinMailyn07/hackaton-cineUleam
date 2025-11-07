@@ -53,7 +53,8 @@ export class HeaderAdminComponent implements OnInit {
     { texto: 'Peliculas', icono: 'pi pi-video', ruta: '/admin/movie-management' },
     { texto: 'Funciones', icono: 'pi pi-ticket', ruta: '/admin/movie-showtimes-management' },
     { texto: 'Usuario', icono: 'pi pi-calendar', ruta: '/admin/user-management' },
-    { texto: 'Reportes', icono: 'pi pi-tag', ruta: '/promociones' }
+    { texto: 'Reservas', icono: 'pi pi-tag', ruta: '/admin/reservas' },
+    { texto: 'Reportes', icono: 'pi pi-calendar', ruta: '/admin/report' },
   ];
 
   sugerencias = [

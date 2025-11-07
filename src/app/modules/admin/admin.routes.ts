@@ -24,5 +24,9 @@ export const routesAdmin: Routes = [
     {
         path: 'report',
         loadComponent: () => import('./report/report').then(m => m.Report),
+    },
+    {
+        path:'reservas',
+        loadChildren :() => import ('./reservas-management/reservas-management').then(m =>m.ReservasManagementComponent)
     }
 ];
