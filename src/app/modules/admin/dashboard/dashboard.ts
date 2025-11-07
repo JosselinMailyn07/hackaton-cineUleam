@@ -63,7 +63,7 @@ export class DashboardComponent implements OnInit {
       {
         titulo: 'Películas Activas',
         valor: 24,
-        icono: 'pi pi-film',
+        icono: 'pi pi-video',
         color: '#e30614',
         variacion: 12,
         descripcion: 'En cartelera'
