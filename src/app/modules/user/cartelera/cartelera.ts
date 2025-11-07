@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CarouselModule } from 'primeng/carousel';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
+import { HeaderComponent } from '@shared/header/header';
+import { FooterComponent } from '@shared/footer/footer';
 
 interface Pelicula {
   id: number;
@@ -17,7 +19,9 @@ interface Pelicula {
   imports: [
     CommonModule,
     CarouselModule,
-    ButtonModule
+    ButtonModule,
+    HeaderComponent,
+    FooterComponent
   ],
   templateUrl: './cartelera.html',
   styleUrls: ['./cartelera.scss'],
