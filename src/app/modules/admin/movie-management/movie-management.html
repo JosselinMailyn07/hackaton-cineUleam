@@ -1,4 +1,4 @@
-<header></header>
+<app-header></app-header>
 <div class="gestionPeliculasContainer">
     <!-- Toast para notificaciones -->
     <p-toast></p-toast>
@@ -418,24 +418,42 @@
         </div>
   
         <!-- Footer del diálogo -->
-        <ng-template pTemplate="footer">
-          <button 
-            pButton 
-            label="Cancelar" 
-            icon="pi pi-times" 
-            class="p-button-text"
-            (click)="mostrarDialogoEdicion = false">
-          </button>
-          
-          <button 
-            pButton 
-            [label]="esEdicion ? 'Actualizar' : 'Crear'" 
-            icon="pi pi-check" 
-            class="p-button-primary"
-            type="submit">
-          </button>
-        </ng-template>
+      <!-- Reemplaza la sección del footer del diálogo en movie-management.html -->
+
+<!-- Footer del diálogo con botones Guardar y Cancelar -->
+<ng-template pTemplate="footer">
+    <div class="footerFormulario">
+      <button 
+        pButton 
+        label="Cancelar" 
+        icon="pi pi-times" 
+        class="p-button-text botonCancelar"
+        type="button"
+        (click)="cancelarFormulario()">
+      </button>
+      
+      <div class="accionesDerecha">
+        <button 
+          pButton 
+          label="Guardar Borrador" 
+          icon="pi pi-save" 
+          class="p-button-secondary botonBorrador"
+          type="button"
+          (click)="guardarBorrador()"
+          *ngIf="esEdicion">
+        </button>
+        
+        <button 
+          pButton 
+          [label]="esEdicion ? 'Actualizar Película' : 'Crear Película'" 
+          [icon]="esEdicion ? 'pi pi-check' : 'pi pi-plus'" 
+          class="p-button-primary botonGuardar"
+          type="submit">
+        </button>
+      </div>
+    </div>
+  </ng-template>
       </form>
     </p-dialog>
   </div>
-  <footer></footer>
+  <app-footer></app-footer>

@@ -14,6 +14,10 @@ export const routesAdmin: Routes = [
         loadComponent: () => import('./movie-management/movie-management').then(m => m.MovieManagementComponent),
     },
     {
+        path: 'movie-showtimes-management',
+        loadComponent: () => import('./movie-showtimes-management/movie-showtimes-management').then(m => m.MovieShowtimesManagementComponent),
+    },
+    {
         path: 'user-management',
         loadComponent: () => import('./user-management/user-management').then(m => m.UserManagement),
     },

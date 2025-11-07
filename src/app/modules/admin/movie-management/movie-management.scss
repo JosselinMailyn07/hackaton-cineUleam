@@ -281,6 +281,95 @@
     display: block;
   }
   
+  /* Estilos para el footer del formulario - FUERA DEL MEDIA QUERY */
+  .footerFormulario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 1rem 0 0 0;
+    border-top: 1px solid var(--color-borde);
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+    }
+  }
+  
+  .accionesDerecha {
+    display: flex;
+    gap: 0.5rem;
+    
+    @media (max-width: 768px) {
+      justify-content: space-between;
+    }
+  }
+  
+  /* Estilos específicos para los botones */
+  .botonCancelar {
+    color: var(--color-texto-secundario);
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+  
+  .botonBorrador {
+    background: var(--color-secundario);
+    border-color: var(--color-secundario);
+    
+    &:hover {
+      background: var(--color-secundario-hover);
+      border-color: var(--color-secundario-hover);
+    }
+  }
+  
+  .botonGuardar {
+    background: var(--color-primario);
+    border-color: var(--color-primario);
+    
+    &:hover {
+      background: var(--color-primario-hover);
+      border-color: var(--color-primario-hover);
+    }
+    
+    &:disabled {
+      background: var(--color-texto-secundario);
+      border-color: var(--color-texto-secundario);
+      cursor: not-allowed;
+    }
+  }
+  
+  /* Mejoras para el diálogo completo */
+  ::ng-deep .p-dialog {
+    .p-dialog-content {
+      padding-bottom: 0;
+    }
+    
+    .p-dialog-footer {
+      padding: 1.5rem;
+      background: var(--color-superficie);
+      border-top: 1px solid var(--color-borde);
+    }
+  }
+  
+  /* Estados del formulario */
+  .formularioPelicula {
+    .campoObligatorio {
+      label::after {
+        content: " *";
+        color: #ef4444;
+      }
+    }
+    
+    .campoOpcional {
+      label {
+        color: var(--color-texto-secundario);
+      }
+    }
+  }
+  
   /* Responsive */
   @media (max-width: 768px) {
     .gestionPeliculasContainer {
@@ -322,6 +411,12 @@
     
     .tablaContainer {
       border-radius: 8px;
+    }
+    
+    /* Ajustes adicionales para móviles pequeños */
+    .accionesDerecha {
+      flex-direction: column;
+      gap: 0.5rem;
     }
   }
   

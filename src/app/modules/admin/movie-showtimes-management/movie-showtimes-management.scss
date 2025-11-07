@@ -1,0 +1,411 @@
+.gestionFuncionesContainer {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  /* Header y Acciones */
+  .headerAcciones {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+  
+  .headerInfo {
+    .tituloPagina {
+      color: var(--color-texto);
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .descripcionPagina {
+      color: var(--color-texto-secundario);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+  }
+  
+  .botonNuevaFuncion {
+    flex-shrink: 0;
+  }
+  
+  /* Tabla de Funciones */
+  .tablaContainer {
+    background: var(--color-superficie);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  /* Información de Función en tabla */
+  .infoFuncion {
+    .detallesFuncion {
+      .tituloPelicula {
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-texto);
+        line-height: 1.2;
+      }
+      
+      .fechaHora {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--color-texto-secundario);
+      }
+    }
+  }
+  
+  /* Sala y Tipo */
+  .salaTipo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    
+    .salaInfo {
+      font-weight: 600;
+      color: var(--color-texto);
+    }
+    
+    .tagTipo {
+      align-self: flex-start;
+    }
+  }
+  
+  /* Fecha y Hora */
+  .fechaHoraCompleta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    
+    .fecha {
+      font-weight: 600;
+      color: var(--color-texto);
+      font-size: 0.9rem;
+    }
+    
+    .hora {
+      color: var(--color-texto-secundario);
+      font-size: 0.85rem;
+    }
+  }
+  
+  /* Asientos y Barra de Ocupación */
+  .infoAsientos {
+    .barraOcupacion {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      
+      .barraFondo {
+        flex: 1;
+        height: 8px;
+        background: var(--color-borde);
+        border-radius: 4px;
+        overflow: hidden;
+        
+        .barraProgreso {
+          height: 100%;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+          
+          &.barra-completa {
+            background: #ef4444;
+          }
+          
+          &.barra-disponible {
+            background: #10b981;
+          }
+          
+          &.barra-cancelada {
+            background: #6b7280;
+          }
+        }
+      }
+      
+      .textoAsientos {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--color-texto);
+        min-width: 50px;
+        text-align: right;
+      }
+    }
+  }
+  
+  /* Precio */
+  .precioFuncion {
+    font-weight: 700;
+    color: var(--color-primario);
+    font-size: 1rem;
+  }
+  
+  /* Acciones */
+  .accionesFuncion {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    
+    .botonEditar {
+      color: var(--color-primario);
+      
+      &:hover {
+        background: rgba(227, 6, 20, 0.1);
+      }
+    }
+    
+    .botonActivar {
+      color: #10b981;
+      
+      &:hover {
+        background: rgba(16, 185, 129, 0.1);
+      }
+    }
+    
+    .botonCancelar {
+      color: #f59e0b;
+      
+      &:hover {
+        background: rgba(245, 158, 11, 0.1);
+      }
+    }
+    
+    .botonEliminar {
+      color: #ef4444;
+      
+      &:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+  
+  /* Estados de carga y vacío */
+  .cargandoContainer {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-texto-secundario);
+    
+    p {
+      margin: 1rem 0 0 0;
+    }
+  }
+  
+  .vacioContainer {
+    padding: 3rem;
+  }
+  
+  .vacioContent {
+    text-align: center;
+    color: var(--color-texto-secundario);
+    
+    h3 {
+      margin: 1rem 0 0.5rem 0;
+      color: var(--color-texto);
+    }
+    
+    p {
+      margin: 0 0 1.5rem 0;
+    }
+  }
+  
+  /* Diálogo de Formulario */
+  .formularioFuncion {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+  
+  .seccionFormulario {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-borde);
+    
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+  }
+  
+  .tituloSeccion {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-texto);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-primario);
+  }
+  
+  .campoFormulario {
+    margin-bottom: 1.5rem;
+    
+    label {
+      display: block;
+      font-weight: 600;
+      color: var(--color-texto);
+      margin-bottom: 0.5rem;
+    }
+    
+    input, ::ng-deep .p-dropdown, ::ng-deep .p-calendar, ::ng-deep .p-inputnumber {
+      width: 100%;
+    }
+  }
+  
+  .camposGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .errorValidacion {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+  
+  /* Opción personalizada para películas */
+  .opcionPelicula {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    
+    span {
+      font-weight: 600;
+    }
+    
+    small {
+      color: var(--color-texto-secundario);
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Estilos para el footer del formulario */
+  .footerFormulario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 1rem 0 0 0;
+    border-top: 1px solid var(--color-borde);
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+    }
+  }
+  
+  /* Estilos específicos para los botones */
+  .botonCancelar {
+    color: var(--color-texto-secundario);
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+  
+  .botonGuardar {
+    background: var(--color-primario);
+    border-color: var(--color-primario);
+    
+    &:hover {
+      background: var(--color-primario-hover);
+      border-color: var(--color-primario-hover);
+    }
+  }
+  
+  /* Mejoras para el diálogo completo */
+  ::ng-deep .p-dialog {
+    .p-dialog-content {
+      padding-bottom: 0;
+    }
+    
+    .p-dialog-footer {
+      padding: 1.5rem;
+      background: var(--color-superficie);
+      border-top: 1px solid var(--color-borde);
+    }
+  }
+  
+  /* Estados del formulario */
+  .formularioFuncion {
+    .campoObligatorio {
+      label::after {
+        content: " *";
+        color: #ef4444;
+      }
+    }
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .gestionFuncionesContainer {
+      padding: 1rem;
+    }
+    
+    .accionesFuncion {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    .infoAsientos .barraOcupacion {
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch;
+      
+      .textoAsientos {
+        text-align: center;
+      }
+    }
+    
+    ::ng-deep .p-dialog {
+      width: 95vw !important;
+      margin: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .headerInfo {
+      .tituloPagina {
+        font-size: 1.5rem;
+      }
+      
+      .descripcionPagina {
+        font-size: 1rem;
+      }
+    }
+    
+    .tablaContainer {
+      border-radius: 8px;
+    }
+  }
+  
+  /* Scrollbar personalizado */
+  .formularioFuncion::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .formularioFuncion::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 3px;
+  }
+  
+  .formularioFuncion::-webkit-scrollbar-thumb {
+    background: var(--color-secundario);
+    border-radius: 3px;
+  }
+  
+  .formularioFuncion::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primario);
+  }

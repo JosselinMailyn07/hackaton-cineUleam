@@ -17,6 +17,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService, Footer } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { HeaderComponent } from '@shared/header/header';
+import { FooterComponent } from '@shared/footer/footer';
 
 // Interfaces para tipos de datos
 interface Pelicula {
@@ -58,9 +59,11 @@ interface Pelicula {
     FileUploadModule,
     TagModule,
     TooltipModule,
-    ToastModule
-  ],
-  providers: [MessageService, ConfirmationService, HeaderComponent,Footer],
+    ToastModule,
+    HeaderComponent,
+    FooterComponent
+],
+  providers: [MessageService, ConfirmationService, HeaderComponent,FooterComponent],
   templateUrl: './movie-management.html',
   styleUrls: ['./movie-management.scss']
 })
@@ -359,4 +362,74 @@ export class MovieManagementComponent implements OnInit {
       reader.readAsDataURL(file);
     }
   }
+  /**
+ * Cancela el formulario y cierra el diálogo
+ */
+cancelarFormulario() {
+  this.mostrarDialogoEdicion = false;
+  this.submitted = false;
+  this.peliculaSeleccionada = this.crearPeliculaVacia();
+  
+  this.messageService.add({
+    severity: 'info',
+    summary: 'Cancelado',
+    detail: 'Los cambios no fueron guardados',
+    life: 3000
+  });
+}
+
+/**
+ * Guarda la película como borrador
+ */
+guardarBorrador() {
+  if (!this.validarPelicula()) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Validación',
+      detail: 'Complete los campos requeridos para guardar como borrador',
+      life: 5000
+    });
+    return;
+  }
+
+  // Simular guardado como borrador
+  const peliculaBorrador:Pelicula = {
+    ...this.peliculaSeleccionada,
+    estado: 'inactiva' // Los borradores se guardan como inactivos
+  };
+
+  if (this.esEdicion) {
+    // Actualizar película existente como borrador
+    const index = this.listaPeliculas.findIndex(p => p.id === peliculaBorrador.id);
+    if (index !== -1) {
+      this.listaPeliculas[index] = peliculaBorrador;
+    }
+  } else {
+    // Crear nueva película como borrador
+    const nuevaPelicula = {
+      ...peliculaBorrador,
+      id: (this.listaPeliculas.length + 1).toString(),
+      createdAt: new Date()
+    };
+    this.listaPeliculas.push(nuevaPelicula);
+  }
+
+  this.mostrarDialogoEdicion = false;
+  this.peliculaSeleccionada = this.crearPeliculaVacia();
+  
+  this.messageService.add({
+    severity: 'success',
+    summary: 'Borrador Guardado',
+    detail: 'La película fue guardada como borrador',
+    life: 5000
+  });
+}
+
+/**
+ * Maneja el cierre del diálogo
+ */
+onHideDialog() {
+  this.submitted = false;
+  this.peliculaSeleccionada = this.crearPeliculaVacia();
+}
 }
