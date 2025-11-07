@@ -1,0 +1,28 @@
+@use 'tailwindcss' as *;
+
+/* Estilos adicionales para el perfil */
+:host {
+  @apply block;
+}
+
+p-card.perfil-card {
+  @apply border border-[var(--color-borde)];
+  @apply shadow-lg;
+  @apply bg-[var(--color-superficie)];
+  @apply w-full max-w-md;
+}
+
+/* Contenedor del avatar */
+.avatar-container {
+  @apply w-32 h-32 rounded-full overflow-hidden border-4 border-[var(--color-primario)];
+}
+
+/* Avatar redondo */
+.avatar {
+  @apply w-full h-full object-cover;
+}
+
+/* Elementos del perfil */
+.perfil-item {
+  @apply p-3 bg-[var(--color-fondo)] rounded-lg;
+}

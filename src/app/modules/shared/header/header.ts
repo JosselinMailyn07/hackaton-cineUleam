@@ -138,7 +138,7 @@ export class HeaderComponent implements OnInit {
       {
         label: 'Mi Perfil',
         icon: 'pi pi-user',
-        routerLink: '/perfil',
+        routerLink: '/user/perfil',
         command: () => this.cerrarMenuUsuario()
       },
       {

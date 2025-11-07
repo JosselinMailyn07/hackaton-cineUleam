@@ -13,5 +13,9 @@ export const routesUser: Routes = [
     {
         path: 'alquiler',
         loadComponent: () => import('./alquiler/alquiler').then(m => m.Alquiler)
+    },
+    {
+        path: 'perfil',
+        loadComponent: () => import('./perfil/perfil').then(m => m.Perfil)
     }
 ];
