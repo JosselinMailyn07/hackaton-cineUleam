@@ -2,7 +2,51 @@
 @import "primeicons/primeicons.css";
 @import "tailwindcss";
 @plugin "tailwindcss-primeui";
-
-@import "primeng/resources/themes/lara-light-indigo/theme.css";
-@import "primeng/resources/primeng.min.css";
-@import "primeicons/primeicons.css";
+/* Variables de colores corporativos */
+:root {
+    --color-primario: #e30614;
+    --color-primario-hover: #c10511;
+    --color-primario-active: #a0040e;
+    --color-secundario: #565656;
+    --color-secundario-hover: #454545;
+    --color-secundario-active: #343434;
+    --color-texto: #333333;
+    --color-texto-secundario: #666666;
+    --color-fondo: #f8f9fa;
+    --color-borde: #e0e0e0;
+    --color-superficie: #ffffff;
+    --color-exito: #28a745;
+    --color-advertencia: #ffc107;
+    --color-error: #dc3545;
+  }
+  
+  /* Sobreescribir variables de PrimeNG */
+  .p-component {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .p-button {
+    &.p-button-primary {
+      background: var(--color-primario);
+      border-color: var(--color-primario);
+      
+      &:hover {
+        background: var(--color-primario-hover);
+        border-color: var(--color-primario-hover);
+      }
+      
+      &:focus {
+        box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--color-primario);
+      }
+    }
+    
+    &.p-button-secondary {
+      background: var(--color-secundario);
+      border-color: var(--color-secundario);
+      
+      &:hover {
+        background: var(--color-secundario-hover);
+        border-color: var(--color-secundario-hover);
+      }
+    }
+  }

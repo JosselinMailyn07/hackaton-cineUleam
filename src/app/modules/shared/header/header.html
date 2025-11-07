@@ -1,1 +1,169 @@
-<p>header works!</p>
+<header class="headerContainer">
+    <div class="headerContent">
+      <!-- Logo y Menú Hamburguesa -->
+      <div class="headerLeft">
+        <button 
+          *ngIf="mostrarBotonMenu" 
+          pButton 
+          icon="pi pi-bars" 
+          class="p-button-text p-button-plain botonMenu"
+          (click)="alternarMenu()"
+          pTooltip="Menú principal"
+          tooltipPosition="bottom">
+        </button>
+        
+        <div class="logoContainer" routerLink="/inicio">
+          <div class="logoIcono">
+            <i class="pi pi-play-circle"></i>
+          </div>
+          <div class="logoTexto">
+            <span class="logoTitulo">Cine ULEAM</span>
+            <span class="logoVersion">4.0</span>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Búsqueda Compacta -->
+      <div class="headerCenter" *ngIf="mostrarBuscador">
+        <div class="buscadorCompacto">
+          <button 
+            *ngIf="!buscadorExpandido"
+            pButton 
+            icon="pi pi-search" 
+            class="p-button-text p-button-plain botonBuscar"
+            (click)="expandirBuscador()"
+            pTooltip="Buscar películas"
+            tooltipPosition="bottom">
+          </button>
+          
+          <div class="buscadorExpandido" *ngIf="buscadorExpandido">
+            <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input 
+                type="text" 
+                pInputText 
+                placeholder="Buscar..." 
+                [(ngModel)]="terminoBusqueda"
+                (keyup.enter)="realizarBusqueda()"
+                (blur)="contraerBuscador()"
+                class="buscadorInput"
+                #buscadorInput />
+            </span>
+            <button 
+              pButton 
+              icon="pi pi-times" 
+              class="p-button-text p-button-plain botonCerrarBuscar"
+              (click)="contraerBuscador()">
+            </button>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Acciones Derecha -->
+      <div class="headerRight">
+<!--        
+        <div class="indicadoresMovil" *ngIf="esMovil">
+          <div class="indicadorMini">
+            <i class="pi pi-film"></i>
+            <span class="indicadorNumero">{{ contadores.peliculas }}</span>
+          </div>
+          <div class="indicadorMini">
+            <i class="pi pi-star"></i>
+            <span class="indicadorNumero">{{ contadores.estrenos }}</span>
+          </div>
+        </div> -->
+  
+        <!-- Acciones de Usuario -->
+        <div class="accionesUsuario">
+          <!-- Notificaciones -->
+          <button 
+            pButton 
+            icon="pi pi-bell" 
+            class="p-button-text p-button-plain botonAccion"
+            (click)="alternarNotificaciones()"
+            pTooltip="Notificaciones"
+            tooltipPosition="bottom">
+            <span class="badgeNotificacion" *ngIf="notificacionesNoLeidas > 0">
+              {{ notificacionesNoLeidas }}
+            </span>
+          </button>
+  
+          <!-- Carrito/Reservas -->
+          <button 
+            pButton 
+            icon="pi pi-shopping-cart" 
+            class="p-button-text p-button-plain botonAccion"
+            pTooltip="Mis reservas"
+            tooltipPosition="bottom"
+            routerLink="/reservas">
+          </button>
+  
+          <!-- Usuario Logueado -->
+          <div class="usuarioCompacto" *ngIf="usuarioLogueado">
+            <p-menu #menu [model]="itemsMenu" [popup]="true" styleClass="menuUsuario"></p-menu>
+            
+            <button 
+              pButton 
+              class="p-button-text p-button-plain botonUsuario"
+              (click)="menu.toggle($event)">
+              <div class="avatarMini">
+                {{ obtenerIniciales(usuarioLogueado.nombre) }}
+              </div>
+              <span class="usuarioNombreMini" >
+                {{ usuarioLogueado.nombre.split(' ')[0] }}
+              </span>
+            </button>
+          </div>
+  
+          <!-- Login/Registro -->
+          <div class="accionesLoginCompacto" *ngIf="!usuarioLogueado">
+            <button 
+              pButton 
+              icon="pi pi-user" 
+              class="p-button-text botonLoginCompacto"
+              routerLink="/login"
+              pTooltip="Iniciar sesión"
+              tooltipPosition="bottom">
+             
+            </button>
+          </div>
+  
+          <!-- Menú Móvil -->
+          <button 
+            *ngIf="esMovil" 
+            pButton 
+            icon="pi pi-ellipsis-v" 
+            class="p-button-text p-button-plain botonMenuMovil"
+            (click)="menuMovil.toggle($event)"
+            pTooltip="Más opciones"
+            tooltipPosition="bottom">
+          </button>
+          <p-menu #menuMovil [model]="itemsMenuMovil" [popup]="true"></p-menu>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Panel de Notificaciones Móvil -->
+    <div class="panelNotificacionesMovil" *ngIf="mostrarPanelNotificaciones && esMovil">
+      <div class="panelHeaderMovil">
+        <h3>Notificaciones</h3>
+        <button 
+          pButton 
+          icon="pi pi-times" 
+          class="p-button-text p-button-plain"
+          (click)="cerrarNotificaciones()">
+        </button>
+      </div>
+      <div class="listaNotificacionesMovil">
+        <div class="notificacionItemMovil" *ngFor="let notificacion of notificaciones">
+          <div class="notificacionIconoMovil">
+            <i [class]="notificacion.icono"></i>
+          </div>
+          <div class="notificacionContenidoMovil">
+            <p class="notificacionTituloMovil">{{ notificacion.titulo }}</p>
+            <p class="notificacionTiempoMovil">{{ notificacion.tiempo }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>

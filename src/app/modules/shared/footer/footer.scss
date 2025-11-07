@@ -1,0 +1,115 @@
+.footerContainer {
+    background: linear-gradient(135deg, var(--color-secundario) 0%, #333333 100%);
+    color: white;
+    padding: 2rem 0 0 0;
+    margin-top: auto;
+  }
+  
+  .footerContent {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    gap: 2rem;
+  }
+  
+  .footerSection {
+    flex: 1;
+    min-width: 250px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .footerTitle {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background: var(--color-primario);
+      border-radius: 2px;
+    }
+  }
+  
+  .footerText {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+  }
+  
+  .footerList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .footerList li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .footerLink {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+    
+    &:hover {
+      color: var(--color-primario);
+      transform: translateX(5px);
+    }
+  }
+  
+  .footerBottom {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 2rem;
+  }
+  
+  .footerCopyright {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .footerContainer {
+      padding: 1.5rem 0 0 0;
+    }
+    
+    .footerContent {
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 0 1rem;
+    }
+    
+    .footerSection {
+      min-width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .footerBottom {
+      margin-top: 1rem;
+      padding: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .footerContent {
+      padding: 0 0.5rem;
+    }
+    
+    .footerTitle {
+      font-size: 1.1rem;
+    }
+  }
