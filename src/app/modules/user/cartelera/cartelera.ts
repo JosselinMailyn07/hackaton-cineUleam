@@ -1,74 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CarouselModule } from 'primeng/carousel';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { HeaderComponent } from '@shared/header/header';
 import { FooterComponent } from '@shared/footer/footer';
+import { LoaderComponent } from '@shared/loader/loader';
+import { User } from '@app/services/user';
 
-interface Pelicula {
-  id: number;
-  titulo: string;
-  imagen: string;
-  categoria: string;
-  etiqueta: string;
-  descripcion: string;
-  textoBoton: string;
-}
 @Component({
   selector: 'cartelera',
+  standalone: true,
   imports: [
     CommonModule,
     CarouselModule,
     ButtonModule,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    ProgressSpinnerModule, 
+    LoaderComponent
   ],
   templateUrl: './cartelera.html',
   styleUrls: ['./cartelera.scss'],
 })
-export class Cartelera {
-  peliculas: Pelicula[] = [
-    {
-      id: 1,
-      titulo: 'Inside Out 2',
-      imagen: 'https://static1.moviewebimages.com/wordpress/wp-content/uploads/2023/11/inside_out_two_xlg.jpg',
-      categoria: 'ANIMACIÓN',
-      etiqueta: 'ESTRENO',
-      descripcion:
-        'Las emociones regresan con nuevas aventuras dentro de la mente de Riley, explorando la adolescencia con humor y ternura.',
-      textoBoton: 'Ver ahora'
-    },
-    {
-      id: 2,
-      titulo: 'Dune: Parte Dos',
-      imagen: 'https://th.bing.com/th/id/R.1b2964e594bd3cb7461777e06072b7df?rik=vHZSBUNf4uqSKQ&riu=http%3a%2f%2fwww.beautifulballad.org%2fwp-content%2fuploads%2f2024%2f01%2fdune-part-two-DUNE2_VERT_MAIN_2764x4096_DOM_REV_rgb.jpg&ehk=r6NC4IY8%2bwPicTcNnRjRaP1peBAB3zfTEEEbcnP4rr8%3d&risl=&pid=ImgRaw&r=0',
-      categoria: 'CIENCIA FICCIÓN',
-      etiqueta: 'DESTACADA',
-      descripcion:
-        'Paul Atreides se une a los Fremen para vengar la conspiración que destruyó a su familia, enfrentando su destino en Arrakis.',
-      textoBoton: 'Ver ahora'
-    },
-    {
-      id: 3,
-      titulo: 'Oppenheimer',
-      imagen: 'https://tse3.mm.bing.net/th/id/OIP.MZQeJtP5IGINFpMyhMiZ7wHaEK?rs=1&pid=ImgDetMain&o=7&rm=3',
-      categoria: 'DRAMA',
-      etiqueta: 'ÉXITO',
-      descripcion:
-        'La historia de J. Robert Oppenheimer, el creador de la bomba atómica, y el dilema moral que cambió la historia del mundo.',
-      textoBoton: 'Ver ahora'
-    },
-    {
-      id: 4,
-      titulo: 'Spider-Man: Across the Spider-Verse',
-      imagen: 'https://tse1.mm.bing.net/th/id/OIP.UPzP54t5s9v9JIA0SULCcAHaK_?rs=1&pid=ImgDetMain&o=7&rm=3',
-      categoria: 'SUPERHÉROES',
-      etiqueta: 'POPULAR',
-      descripcion:
-        'Miles Morales se embarca en una nueva aventura multiversal junto a Gwen Stacy y un ejército de Spider-Personas.',
-      textoBoton: 'Ver ahora'
-    }
-  ];
+export class Cartelera implements OnInit {
+  
+  peliculasEnCartelera: any[] = [];
+  peliculasProximas: any[] = [];
+  
+  cargando: boolean = true;
+  private categoriasMap = new Map<number, string>();
+
   opcionesResponsivas = [
     {
       breakpoint: '1024px',
@@ -86,4 +49,67 @@ export class Cartelera {
       numScroll: 1,
     }
   ];
+
+  constructor(
+    // 2. INYECTAR 'User'
+    private userService: User,
+    private router: Router
+  ) { }
+
+  ngOnInit(): void {
+    this.cargarDatos();
+  }
+
+  async cargarDatos() {
+    this.cargando = true;
+    try {
+      // 3. LLAMAR A 'userService' PARA AMBAS CONSULTAS
+      const [allMovies, allCategorias] = await Promise.all([
+        this.userService.getPeliculas(),
+        this.userService.getCategorias() // Usando el método de tu servicio
+      ]);
+
+      // 4. Crea el Mapa de categorías (ej: 1 -> 'Acción')
+      allCategorias.forEach((cat: any) => {
+        this.categoriasMap.set(cat.id, cat.nombre);
+      });
+
+      // 5. Procesa las películas para añadir el nombre de la categoría
+      const processedMovies = allMovies.map((pelicula: any) => {
+        let categoriaNombre = 'General'; // Default
+        if (pelicula.categorias && pelicula.categorias.length > 0) {
+          const primerCatId = pelicula.categorias[0];
+          categoriaNombre = this.categoriasMap.get(primerCatId) || 'General';
+        }
+        return {
+          ...pelicula,
+          categoriaNombre: categoriaNombre.toUpperCase()
+        };
+      });
+
+      // 6. Filtra las películas procesadas
+      this.peliculasEnCartelera = processedMovies.filter(
+        (p: any) => p.estado === 'cartelera'
+      );
+      
+      this.peliculasProximas = processedMovies.filter(
+        (p: any) => p.estado === 'proximamente' || p.estado === 'estreno'
+      );
+
+      console.log('En cartelera:', this.peliculasEnCartelera);
+      console.log('Próximas:', this.peliculasProximas);
+
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+    } finally {
+      this.cargando = false;
+    }
+  }
+
+  /**
+   * Navega a la página de detalles de la película
+   */
+  verDetalle(peliculaId: number) {
+    this.router.navigate(['/pelicula', peliculaId]);
+  }
 }
