@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { CarouselModule } from 'primeng/carousel';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
@@ -6,9 +7,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { HeaderComponent } from '@shared/header/header';
 import { FooterComponent } from '@shared/footer/footer';
 import { LoaderComponent } from '@shared/loader/loader';
-import { HorarioPelicula } from '../horario-pelicula/horario-pelicula';
 import { User } from '@app/services/user';
-
+import { HorarioPeliculaComponent } from '../horario-pelicula/horario-pelicula';
 @Component({
   selector: 'cartelera',
   standalone: true,
@@ -18,107 +18,76 @@ import { User } from '@app/services/user';
     ButtonModule,
     HeaderComponent,
     FooterComponent,
-    ProgressSpinnerModule, 
+    ProgressSpinnerModule,
     LoaderComponent,
-    HorarioPelicula
+    HorarioPeliculaComponent
   ],
   templateUrl: './cartelera.html',
   styleUrls: ['./cartelera.scss'],
 })
 export class Cartelera implements OnInit {
-  
   peliculasEnCartelera: any[] = [];
   peliculasProximas: any[] = [];
-  peliculasEstrenos: any[] = [];
-  
-  cargando: boolean = true;
-  mostrarModalHorarios: boolean = false;
+  cargando = true;
+
+  mostrarModalHorarios = false;
   peliculaSeleccionada: any = null;
+
   private categoriasMap = new Map<number, string>();
 
   opcionesResponsivas = [
-    {
-      breakpoint: '1024px',
-      numVisible: 3,
-      numScroll: 1,
-    },
-    {
-      breakpoint: '768px',
-      numVisible: 2,
-      numScroll: 1,
-    },
-    {
-      breakpoint: '560px',
-      numVisible: 1,
-      numScroll: 1,
-    }
+    { breakpoint: '1024px', numVisible: 3, numScroll: 1 },
+    { breakpoint: '768px', numVisible: 2, numScroll: 1 },
+    { breakpoint: '560px', numVisible: 1, numScroll: 1 },
   ];
 
+  @ViewChild(HorarioPeliculaComponent)
+  modalHorarios!: HorarioPeliculaComponent;
+
   constructor(
-    // 2. INYECTAR 'User'
-    private userService: User
+    private userService: User,
+    private router: Router
   ) { }
 
-  ngOnInit(): void {
-    this.cargarDatos();
+  async ngOnInit() {
+    await this.cargarDatos();
   }
 
   async cargarDatos() {
     this.cargando = true;
     try {
-      // 3. LLAMAR A 'userService' PARA AMBAS CONSULTAS
-      const [allMovies, allCategorias] = await Promise.all([
+      const [peliculas, categorias] = await Promise.all([
         this.userService.getPeliculas(),
-        this.userService.getCategorias() // Usando el método de tu servicio
+        this.userService.getCategorias()
       ]);
 
-      // 4. Crea el Mapa de categorías (ej: 1 -> 'Acción')
-      allCategorias.forEach((cat: any) => {
-        this.categoriasMap.set(cat.id, cat.nombre);
+      categorias.forEach((c: any) => this.categoriasMap.set(c.id, c.nombre));
+
+      const procesadas = peliculas.map((p: any) => {
+        const catId = p.categorias?.[0];
+        const catNombre = this.categoriasMap.get(catId) || 'General';
+        return { ...p, categoriaNombre: catNombre.toUpperCase() };
       });
 
-      // 5. Procesa las películas para añadir el nombre de la categoría
-      const processedMovies = allMovies.map((pelicula: any) => {
-        let categoriaNombre = 'General'; // Default
-        if (pelicula.categorias && pelicula.categorias.length > 0) {
-          const primerCatId = pelicula.categorias[0];
-          categoriaNombre = this.categoriasMap.get(primerCatId) || 'General';
-        }
-        return {
-          ...pelicula,
-          categoriaNombre: categoriaNombre.toUpperCase()
-        };
-      });
-
-      // 6. Filtra las películas procesadas en tres categorías
-      this.peliculasEnCartelera = processedMovies.filter(
-        (p: any) => p.estado === 'cartelera'
+      this.peliculasEnCartelera = procesadas.filter((p: any) => p.estado === 'cartelera');
+      this.peliculasProximas = procesadas.filter(
+        (p: any) => ['proximamente', 'estreno'].includes(p.estado)
       );
-      
-      this.peliculasProximas = processedMovies.filter(
-        (p: any) => p.estado === 'proximamente'
-      );
-
-      this.peliculasEstrenos = processedMovies.filter(
-        (p: any) => p.estado === 'estreno'
-      );
-
-      console.log('En cartelera:', this.peliculasEnCartelera);
-      console.log('Próximamente:', this.peliculasProximas);
-      console.log('Estrenos:', this.peliculasEstrenos);
-
-    } catch (error) {
-      console.error('Error cargando datos:', error);
+    } catch (err) {
+      console.error('Error cargando datos:', err);
     } finally {
       this.cargando = false;
     }
   }
 
-  /**
-   * Abre el modal de horarios para la película seleccionada
-   */
   verDetalle(pelicula: any) {
+    this.router.navigate(['/pelicula', pelicula.idpelicula]);
+  }
+
+  // ✅ Nuevo: abrir modal de horarios desde el botón
+  abrirHorarios(pelicula: any) {
     this.peliculaSeleccionada = pelicula;
     this.mostrarModalHorarios = true;
+    setTimeout(() => this.modalHorarios.abrirModal(pelicula), 50);
   }
 }
