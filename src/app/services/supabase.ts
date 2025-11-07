@@ -9,94 +9,144 @@ import { BehaviorSubject } from 'rxjs';
 export class Supabase {
   public readonly supabase: SupabaseClient;
 
+  currentSession: BehaviorSubject<Session | null> = new BehaviorSubject<Session | null>(null);
+  private currentUserProfile = new BehaviorSubject<any | null>(null);
+  public currentUserProfile$ = this.currentUserProfile.asObservable();
+
   constructor() {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
+
+    this.supabase.auth.onAuthStateChange((event, session) => {
+      this.currentSession.next(session);
+      if (event === 'SIGNED_OUT') {
+        this.currentUserProfile.next(null);
+      } else if (event === 'SIGNED_IN' && session) {
+        this.loadProfile(session.user.id);
+      }
+    });
   }
 
-  // --- Peliculas ---
-  async getPeliculas() {
-    const { data, error } = await this.supabase.from('peliculas').select('*');
-    if (error) throw error;
+  async autenticar(datos: any): Promise<any> {
+    const { data: authData, error: authError } =
+      await this.supabase.auth.signInWithPassword(datos);
+
+    if (authError) {
+      this.currentUserProfile.next(null);
+      throw authError;
+    }
+    if (!authData.user) throw new Error("No se encontró el usuario en la sesión.");
+
+    return this.loadProfile(authData.user.id);
+  }
+
+  async loadProfile(userId: string) {
+    try {
+      // Obtener perfil básico
+      const { data: profileData, error: profileError } = await this.supabase
+        .from('profiles')
+        .select(`
+          *,
+          usuarios_roles (
+            roles (
+              id,
+              nombre
+            )
+          )
+        `)
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        console.error('Error cargando perfil:', profileError);
+        this.currentUserProfile.next(null);
+        throw profileError;
+      }
+
+      // Obtener email desde auth.users
+      const { data: { user }, error: userError } = await this.supabase.auth.getUser();
+
+      if (userError) {
+        console.error('Error obteniendo usuario auth:', userError);
+      }
+
+      // Combinar datos
+      const completeProfile = {
+        ...profileData,
+        email: user?.email || profileData.email || 'No disponible'
+      };
+
+      this.currentUserProfile.next(completeProfile);
+      return completeProfile;
+
+    } catch (error) {
+      console.error('Error en loadProfile:', error);
+      this.currentUserProfile.next(null);
+      throw error;
+    }
+  }
+
+  async logout() {
+    const { error } = await this.supabase.auth.signOut();
+    this.currentUserProfile.next(null);
+    if (error) {
+      throw error;
+    }
+  }
+
+  // --- FLUJO DE REGISTRO ---
+
+  async registrar(datos: any): Promise<any> {
+    const { data, error } = await this.supabase.auth.signUp(datos);
+    if (error) {
+      throw error;
+    }
+    return data;
+  }
+
+  async setSession(session: any): Promise<any> {
+    const { data, error } = await this.supabase.auth.setSession(session);
+    if (error) {
+      throw error;
+    }
     return data;
   }
 
   /**
-   * Obtiene películas con límite y ordenadas por estreno.
+   * CORREGIDO: Crear perfil sin email (se obtiene de auth.users)
    */
-  async getPeliculasRecientes(datos: any) {
-    // Asumo datos = { limit: 5 }
+  async crearPerfil(datos: any): Promise<any> {
     const { data, error } = await this.supabase
-      .from('peliculas')
-      .select('*')
-      .order('fecha_estreno', { ascending: false }) // Más nuevas primero
-      .limit(datos.limit);
-    if (error) throw error;
-    return data;
-  }
-
-  async getPeliculaById(datos: any) {
-    const { data, error } = await this.supabase
-      .from('peliculas')
-      .select('*')
-      .eq('id', datos.id) // Asumo { id: 5 }
+      .from('profiles')
+      .insert({
+        id: datos.userId,
+        nombres: datos.profileData.nombres,
+        apellidos: datos.profileData.apellidos,
+        telefono: datos.profileData.telefono,
+        estado: 'activo',
+        carrera: datos.profileData.carrera
+      })
+      .select()
       .single();
-    if (error) throw error;
+
+    if (error) {
+      throw error;
+    }
     return data;
   }
 
-  // --- Categorias ---
-  async getCategorias() {
+  async asignarRolInicial(datos: any): Promise<any> {
     const { data, error } = await this.supabase
-      .from('categorias')
-      .select('id, nombre')
-      .eq('estado', 'activo');
-    if (error) throw error;
+      .from('usuarios_roles')
+      .insert({
+        id_usuario: datos.userId,
+        id_rol: datos.rolId || 1
+      })
+      .select();
+    if (error) {
+      throw error;
+    }
     return data;
   }
-
-  // --- Funciones ---
-  async getFunciones() {
-    const { data, error } = await this.supabase
-      .from('funciones')
-      .select(`*, salas ( id, codigo, ubicacion ), peliculas ( id, nombre, imagen, duracion )`);
-    if (error) throw error;
-    return data;
-  }
-
-  /**
-   * Obtiene funciones con límite y ordenadas por inicio.
-   */
-  async getFuncionesRecientes(datos: any) {
-    // Asumo datos = { limit: 10 }
-    const { data, error } = await this.supabase
-      .from('funciones')
-      .select(`*, salas ( id, codigo ), peliculas ( id, nombre )`)
-      .order('fecha_hora_inicio', { ascending: true }) // Las más próximas a empezar
-      .limit(datos.limit);
-    if (error) throw error;
-    return data;
-  }
-
-
-  async getFuncionesPorPelicula(datos: any) {
-    const { data, error } = await this.supabase
-      .from('funciones')
-      .select(`*, salas ( id, codigo, ubicacion )`)
-      .eq('id_peli', datos.peliculaId); // Asumo { peliculaId: 5 }
-    if (error) throw error;
-    return data;
-  }
-
-  // --- Salas ---
-  async getSalas() {
-    const { data, error } = await this.supabase.from('salas').select('*');
-    if (error) throw error;
-    return data;
-  }
-
-  // ===============================================
-  // === MÉTODOS DE ACCIÓN (Usuario Logueado) ===
-  // ===============================================
 
   // --- Reservas ---
   async createReserva(datos: any) {
@@ -115,7 +165,16 @@ export class Supabase {
 
     const { data, error } = await this.supabase
       .from('reservas')
-      .select(`*, funciones ( fecha_hora_inicio, peliculas ( nombre, imagen ) )`)
+      .select(`
+        *,
+        funciones (
+          fecha_hora_inicio,
+          peliculas (
+            nombre,
+            imagen
+          )
+        )
+      `)
       .eq('id_usuario', user.id);
 
     if (error) throw error;
@@ -186,7 +245,7 @@ export class Supabase {
     // Asumo datos = { limit: 20 }
     const { data, error } = await this.supabase
       .from('peliculas')
-      .select(`*`)
+      .select('*')
       .order('create_at', { ascending: false }) // Más nuevas primero
       .limit(datos.limit);
     if (error) throw error;
@@ -211,28 +270,147 @@ export class Supabase {
     return data;
   }
 
-  // --- Admin: Lectura de Tablas de Sistema ---
+  // ===============================================
+  // === MÉTODOS PARA GESTIÓN DE USUARIOS ===
+  // ===============================================
+
+  /**
+   * CORREGIDO: Obtener perfiles con email desde auth.users
+   */
+  async getPerfiles() {
+    try {
+      // Obtener todos los perfiles con sus roles
+      const { data: perfiles, error: perfilesError } = await this.supabase
+        .from('profiles')
+        .select(`
+          *,
+          usuarios_roles (
+            roles (
+              id,
+              nombre
+            )
+          )
+        `);
+
+      if (perfilesError) throw perfilesError;
+
+      // Obtener todos los usuarios de auth para obtener emails
+      const { data: { users }, error: usersError } = await this.supabase.auth.admin.listUsers();
+
+      if (usersError) {
+        console.error('Error obteniendo usuarios auth:', usersError);
+      }
+
+      // Combinar datos: mapear perfiles con sus emails correspondientes
+      const perfilesCompletos = perfiles.map(perfil => {
+        const usuarioAuth = users?.find((user: any) => user.id === perfil.id);
+        return {
+          ...perfil,
+          email: usuarioAuth?.email || 'No disponible',
+          // Asegurar que siempre tenga un array de usuarios_roles
+          usuarios_roles: perfil.usuarios_roles || []
+        };
+      });
+
+      return perfilesCompletos;
+
+    } catch (error) {
+      console.error('Error en getPerfiles:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * NUEVO: Obtener conteo de reservas por usuario
+   */
+  async getReservasCountPorUsuario() {
+    try {
+      const { data, error } = await this.supabase
+        .from('reservas')
+        .select('id_usuario, estado');
+
+      if (error) throw error;
+
+      const counts: { [key: string]: number } = {};
+      data?.forEach(reserva => {
+        if (reserva.estado === 'pendiente' || reserva.estado === 'en curso') {
+          counts[reserva.id_usuario] = (counts[reserva.id_usuario] || 0) + 1;
+        }
+      });
+
+      return counts;
+    } catch (error) {
+      console.error('Error obteniendo conteo de reservas:', error);
+      return {};
+    }
+  }
+
+  async updateUserProfile(datos: any) {
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .update(datos.updateData)
+      .eq('id', datos.userId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  }
+
+  async updateUserRoles(datos: any) {
+    // 1. Borrar roles antiguos
+    const { error: deleteError } = await this.supabase
+      .from('usuarios_roles')
+      .delete()
+      .eq('id_usuario', datos.userId);
+    if (deleteError) throw deleteError;
+
+    // 2. Insertar roles nuevos (solo si hay roles para asignar)
+    if (datos.newRoles && datos.newRoles.length > 0) {
+      const rolesToInsert = datos.newRoles.map((rolId: number) => ({
+        id_usuario: datos.userId,
+        id_rol: rolId
+      }));
+
+      const { data, error: insertError } = await this.supabase
+        .from('usuarios_roles')
+        .insert(rolesToInsert)
+        .select();
+      if (insertError) throw insertError;
+      return data;
+    }
+
+    return [];
+  }
+
+  async deleteProfile(datos: any) {
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .delete()
+      .eq('id', datos.userId);
+    if (error) throw error;
+    return data;
+  }
+
   async getRoles() {
     const { data, error } = await this.supabase.from('roles').select('*');
     if (error) throw error;
     return data;
   }
 
-  async getPerfiles() {
-    const { data, error } = await this.supabase.from('profiles').select('*, usuarios_roles(roles(nombre))');
+  async getUserRoleLinks() {
+    const { data, error } = await this.supabase
+      .from('usuarios_roles')
+      .select('*');
     if (error) throw error;
     return data;
   }
 
-  async getModulos() {
-    const { data, error } = await this.supabase.from('modulos').select('*');
+  async getPermisosRol() {
+    const { data, error } = await this.supabase
+      .from('permisosRol')
+      .select('*, roles(nombre), submodulos(nombre, url)');
     if (error) throw error;
     return data;
   }
 
-  async getSubmodulos() {
-    const { data, error } = await this.supabase.from('submodulos').select('*');
-    if (error) throw error;
-    return data;
-  }
 }

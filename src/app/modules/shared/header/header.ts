@@ -464,4 +464,4 @@ export class HeaderComponent implements OnInit {
     if (this.esTablet) return 'Tablet';
     return 'Desktop';
   }
-}
+} 

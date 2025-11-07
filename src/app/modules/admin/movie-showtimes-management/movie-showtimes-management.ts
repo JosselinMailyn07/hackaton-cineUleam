@@ -3,47 +3,51 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
-// PrimeNG Modules - Verificar que estén instalados
+// PrimeNG Modules
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+// import { CalendarModule } from 'primeng/calendar';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 
-// Módulos que pueden faltar - alternativas si no están disponibles
-// import { DropdownModule } from 'primeng/dropdown';
-// import { CalendarModule } from 'primeng/calendar';
-// import { InputNumberModule } from 'primeng/inputnumber';
-
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { HeaderAdminComponent } from '../header-admin/header-admin';
+import { FuncionesService } from '@app/services/funciones.service';
+import { PeliculasService } from '@app/services/peliculas.service';
 import { FooterComponent } from '@shared/footer/footer';
-
-// Interfaces para tipos de datos
+import { HeaderAdminComponent } from '../header-admin/header-admin';
+// Interfaces alineadas con la base de datos
 interface Funcion {
-  id?: string;
-  peliculaId: string;
-  peliculaTitulo: string;
-  sala: string;
-  fecha: Date;
-  hora: string;
-  asientosDisponibles: number;
-  asientosTotales: number;
-  precio: number;
-  tipo: '2D' | '3D' | '4DX';
-  estado: 'activa' | 'cancelada' | 'completa';
-  createdAt?: Date;
-  updatedAt?: Date;
+  id?: number;
+  id_sala: number;
+  id_peli: number;
+  fecha_hora_inicio: string;
+  fecha_hora_fin: string;
+  create_at?: string;
+  update_at?: string | null;
+  // Campos para mostrar en la tabla
+  pelicula_nombre?: string;
+  pelicula_duracion?: number;
+  sala_nombre?: string;
 }
 
 interface Pelicula {
-  id: string;
-  titulo: string;
+  id: number;
+  nombre: string;
   duracion: number;
   estado: string;
+}
+
+interface Sala {
+  id: number;
+  nombre: string;
+  capacidad: number;
+  tipo: string;
 }
 
 @Component({
@@ -53,22 +57,21 @@ interface Pelicula {
     CommonModule,
     RouterModule,
     FormsModule,
-    // PrimeNG Modules disponibles
+    // PrimeNG Modules
     TableModule,
     ButtonModule,
     DialogModule,
     ConfirmDialogModule,
     InputTextModule,
+    SelectModule,
+    InputNumberModule,
     TagModule,
     ToastModule,
     TooltipModule,
-   HeaderAdminComponent,
-   FooterComponent
-    // DropdownModule,
-    // CalendarModule,
-    // InputNumberModule
-  ],
-  providers: [MessageService, ConfirmationService],
+    FooterComponent,
+    HeaderAdminComponent
+],
+  providers: [MessageService, ConfirmationService, FooterComponent, HeaderAdminComponent],
   templateUrl: './movie-showtimes-management.html',
   styleUrls: ['./movie-showtimes-management.scss']
 })
@@ -80,8 +83,9 @@ export class MovieShowtimesManagementComponent implements OnInit {
   // Función seleccionada para edición
   funcionSeleccionada: Funcion = this.crearFuncionVacia();
   
-  // Lista de películas para dropdown
+  // Listas para dropdowns
   listaPeliculas: Pelicula[] = [];
+  listaSalas: Sala[] = [];
   
   // Estados del componente
   mostrarDialogoEdicion: boolean = false;
@@ -89,99 +93,101 @@ export class MovieShowtimesManagementComponent implements OnInit {
   cargando: boolean = true;
   submitted: boolean = false;
 
-  // Opciones para dropdowns (usaremos inputs normales temporalmente)
-  opcionesSalas: any[] = [
-    { label: 'Sala 1 - Premium', value: 'sala-1' },
-    { label: 'Sala 2 - Standard', value: 'sala-2' },
-    { label: 'Sala 3 - IMAX', value: 'sala-3' },
-    { label: 'Sala 4 - 4DX', value: 'sala-4' },
-    { label: 'Sala 5 - Standard', value: 'sala-5' }
-  ];
-
-  opcionesTipos: any[] = [
-    { label: '2D - Standard', value: '2D' },
-    { label: '3D - Tres Dimensiones', value: '3D' },
-    { label: '4DX - Experiencia Completa', value: '4DX' }
-  ];
-
-  opcionesEstados: any[] = [
-    { label: 'Activa', value: 'activa' },
-    { label: 'Cancelada', value: 'cancelada' },
-    { label: 'Completa', value: 'completa' }
-  ];
-
-  opcionesHoras: any[] = [
-    { label: '10:00 AM', value: '10:00' },
-    { label: '12:30 PM', value: '12:30' },
-    { label: '03:00 PM', value: '15:00' },
-    { label: '05:30 PM', value: '17:30' },
-    { label: '08:00 PM', value: '20:00' },
-    { label: '10:30 PM', value: '22:30' }
-  ];
-
   constructor(
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private funcionesService: FuncionesService,
+    private peliculasService: PeliculasService
   ) {}
 
-  ngOnInit() {
-    // Simular carga de datos
-    this.cargarPeliculas();
-    this.cargarFunciones();
+  async ngOnInit() {
+    await this.cargarDatos();
   }
 
   /**
-   * Carga la lista de películas para el dropdown
+   * Carga todos los datos necesarios
    */
-  cargarPeliculas() {
-    // Simulación de datos de películas
-    this.listaPeliculas = [
-      { id: '1', titulo: 'Avatar: The Way of Water', duracion: 192, estado: 'activa' },
-      { id: '2', titulo: 'The Batman', duracion: 176, estado: 'activa' },
-      { id: '3', titulo: 'Spider-Man: No Way Home', duracion: 148, estado: 'activa' },
-      { id: '4', titulo: 'Dune: Part Two', duracion: 166, estado: 'proximamente' },
-      { id: '5', titulo: 'Black Panther: Wakanda Forever', duracion: 161, estado: 'activa' }
+  async cargarDatos() {
+    this.cargando = true;
+    
+    try {
+      await Promise.all([
+        this.cargarPeliculas(),
+        this.cargarSalas(),
+        this.cargarFunciones()
+      ]);
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'Error al cargar los datos' 
+      });
+    } finally {
+      this.cargando = false;
+    }
+  }
+
+  /**
+   * Carga la lista de películas
+   */
+  async cargarPeliculas() {
+    const { data, error } = await this.peliculasService.obtenerPeliculas();
+    
+    if (error) {
+      console.error('Error cargando películas:', error);
+      throw error;
+    }
+    
+    this.listaPeliculas = data || [];
+  }
+
+  /**
+   * Carga la lista de salas (simulada por ahora)
+   */
+  async cargarSalas() {
+    // Simulación de salas - en producción vendría de un servicio
+    this.listaSalas = [
+      { id: 1, nombre: 'Sala 1 - Premium', capacidad: 120, tipo: '2D' },
+      { id: 2, nombre: 'Sala 2 - Standard', capacidad: 80, tipo: '2D' },
+      { id: 3, nombre: 'Sala 3 - IMAX', capacidad: 150, tipo: '3D' },
+      { id: 4, nombre: 'Sala 4 - 4DX', capacidad: 100, tipo: '4DX' },
+      { id: 5, nombre: 'Sala 5 - Standard', capacidad: 90, tipo: '2D' }
     ];
   }
 
   /**
-   * Carga la lista de funciones desde el servicio
+   * Carga la lista de funciones
    */
-  cargarFunciones() {
-    this.cargando = true;
+  async cargarFunciones() {
+    const { data, error } = await this.funcionesService.obtenerFunciones();
     
-    // Simulación de datos - en producción vendrían de un servicio
-    setTimeout(() => {
-      this.listaFunciones = [
-        {
-          id: '1',
-          peliculaId: '1',
-          peliculaTitulo: 'Avatar: The Way of Water',
-          sala: 'sala-3',
-          fecha: new Date('2024-01-15'),
-          hora: '20:00',
-          asientosDisponibles: 45,
-          asientosTotales: 120,
-          precio: 12.50,
-          tipo: '3D',
-          estado: 'activa'
-        },
-        {
-          id: '2',
-          peliculaId: '2',
-          peliculaTitulo: 'The Batman',
-          sala: 'sala-1',
-          fecha: new Date('2024-01-15'),
-          hora: '17:30',
-          asientosDisponibles: 12,
-          asientosTotales: 80,
-          precio: 8.50,
-          tipo: '2D',
-          estado: 'activa'
-        }
-      ];
-      this.cargando = false;
-    }, 1000);
+    if (error) {
+      console.error('Error cargando funciones:', error);
+      throw error;
+    }
+    
+    this.listaFunciones = data || [];
+    
+    // Enriquecer datos para mostrar
+    this.enriquecerDatosFunciones();
+  }
+
+  /**
+   * Enriquece los datos de las funciones con información de películas y salas
+   */
+  enriquecerDatosFunciones() {
+    this.listaFunciones = this.listaFunciones.map(funcion => {
+      const pelicula = this.listaPeliculas.find(p => p.id === funcion.id_peli);
+      const sala = this.listaSalas.find(s => s.id === funcion.id_sala);
+      
+      return {
+        ...funcion,
+        pelicula_nombre: pelicula?.nombre || 'Película no encontrada',
+        pelicula_duracion: pelicula?.duracion || 0,
+        sala_nombre: sala?.nombre || 'Sala no encontrada'
+      };
+    });
   }
 
   /**
@@ -207,68 +213,92 @@ export class MovieShowtimesManagementComponent implements OnInit {
   /**
    * Guarda la función (crear o actualizar)
    */
-  guardarFuncion() {
+  async guardarFuncion() {
     this.submitted = true;
 
-    // Validación básica
     if (!this.validarFuncion()) {
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'Complete todos los campos requeridos' 
+      });
       return;
     }
 
-    // Simular guardado
-    if (this.esEdicion) {
-      // Actualizar función existente
-      const index = this.listaFunciones.findIndex(f => f.id === this.funcionSeleccionada.id);
-      if (index !== -1) {
-        this.listaFunciones[index] = { 
-          ...this.funcionSeleccionada,
-          updatedAt: new Date()
-        };
+    try {
+      // Calcular fecha_hora_fin basado en la duración de la película
+      await this.calcularFechaFin();
+
+      if (this.esEdicion) {
+        const { error } = await this.funcionesService.actualizarFuncion(
+          this.funcionSeleccionada.id!.toString(), 
+          this.funcionSeleccionada
+        );
+        
+        if (error) throw error;
+        
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: 'Éxito', 
+          detail: 'Función actualizada correctamente' 
+        });
+      } else {
+        const { error } = await this.funcionesService.crearFuncion(this.funcionSeleccionada);
+        
+        if (error) throw error;
+        
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: 'Éxito', 
+          detail: 'Función creada correctamente' 
+        });
       }
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'Función actualizada correctamente'
-      });
-    } else {
-      // Crear nueva función
-      const peliculaSeleccionada = this.listaPeliculas.find(p => p.id === this.funcionSeleccionada.peliculaId);
-      const nuevaFuncion: Funcion = {
-        ...this.funcionSeleccionada,
-        id: (this.listaFunciones.length + 1).toString(),
-        peliculaTitulo: peliculaSeleccionada?.titulo || 'Película Desconocida',
-        createdAt: new Date()
-      };
-      this.listaFunciones.push(nuevaFuncion);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'Función creada correctamente'
+
+      this.mostrarDialogoEdicion = false;
+      await this.cargarFunciones();
+      
+    } catch (error) {
+      console.error('Error guardando función:', error);
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'Error al guardar la función' 
       });
     }
+  }
 
-    this.mostrarDialogoEdicion = false;
-    this.funcionSeleccionada = this.crearFuncionVacia();
+  /**
+   * Calcula la fecha_hora_fin basado en la duración de la película
+   */
+  async calcularFechaFin() {
+    const pelicula = this.listaPeliculas.find(p => p.id === this.funcionSeleccionada.id_peli);
+    
+    if (pelicula && this.funcionSeleccionada.fecha_hora_inicio) {
+      const fechaInicio = new Date(this.funcionSeleccionada.fecha_hora_inicio);
+      const fechaFin = new Date(fechaInicio.getTime() + pelicula.duracion * 60000); // minutos a milisegundos
+      
+      this.funcionSeleccionada.fecha_hora_fin = fechaFin.toISOString();
+    }
   }
 
   /**
    * Valida los datos de la función
    */
   validarFuncion(): boolean {
-    return !!this.funcionSeleccionada.peliculaId &&
-           !!this.funcionSeleccionada.sala &&
-           !!this.funcionSeleccionada.fecha &&
-           !!this.funcionSeleccionada.hora &&
-           this.funcionSeleccionada.asientosTotales > 0 &&
-           this.funcionSeleccionada.precio >= 0;
+    return !!this.funcionSeleccionada.id_peli &&
+           !!this.funcionSeleccionada.id_sala &&
+           !!this.funcionSeleccionada.fecha_hora_inicio;
   }
 
   /**
    * Confirma la eliminación de una función
    */
   confirmarEliminacion(funcion: Funcion) {
+    const peliculaNombre = funcion.pelicula_nombre || 'Película desconocida';
+    const fechaHora = this.formatearFechaHora(funcion.fecha_hora_inicio);
+    
     this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar la función de "${funcion.peliculaTitulo}" el ${this.formatearFecha(funcion.fecha)} a las ${funcion.hora}?`,
+      message: `¿Estás seguro de eliminar la función de "${peliculaNombre}" el ${fechaHora}?`,
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, eliminar',
@@ -280,98 +310,103 @@ export class MovieShowtimesManagementComponent implements OnInit {
   /**
    * Elimina una función
    */
-  eliminarFuncion(id: string) {
-    this.listaFunciones = this.listaFunciones.filter(f => f.id !== id);
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Éxito',
-      detail: 'Función eliminada correctamente'
-    });
-  }
-
-  /**
-   * Cambia el estado de una función
-   */
-  cambiarEstadoFuncion(funcion: Funcion, nuevoEstado: 'activa' | 'cancelada' | 'completa') {
-    funcion.estado = nuevoEstado;
-    
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Éxito',
-      detail: `Función ${this.obtenerTextoEstado(nuevoEstado)}`
-    });
+  async eliminarFuncion(id: number) {
+    try {
+      const { error } = await this.funcionesService.eliminarFuncion(id.toString());
+      
+      if (error) throw error;
+      
+      this.messageService.add({ 
+        severity: 'success', 
+        summary: 'Éxito', 
+        detail: 'Función eliminada correctamente' 
+      });
+      
+      await this.cargarFunciones();
+    } catch (error) {
+      console.error('Error eliminando función:', error);
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'Error al eliminar la función' 
+      });
+    }
   }
 
   /**
    * Crea una función vacía para formularios nuevos
    */
   crearFuncionVacia(): Funcion {
+    const fechaInicio = new Date();
+    fechaInicio.setHours(19, 0, 0, 0); // Establecer a las 7:00 PM por defecto
+    
     return {
-      peliculaId: '',
-      peliculaTitulo: '',
-      sala: '',
-      fecha: new Date(),
-      hora: '',
-      asientosDisponibles: 0,
-      asientosTotales: 0,
-      precio: 0,
-      tipo: '2D',
-      estado: 'activa'
+      id_sala: 0,
+      id_peli: 0,
+      fecha_hora_inicio: fechaInicio.toISOString(),
+      fecha_hora_fin: ''
     };
   }
 
   /**
-   * Obtiene la severidad para el tag de estado
+   * Obtiene la severidad para el tag basado en el estado temporal
    */
-  obtenerSeveridadEstado(estado: string): any {
-    switch (estado) {
-      case 'activa':
-        return 'success';
-      case 'cancelada':
-        return 'danger';
-      case 'completa':
-        return 'warning';
-      default:
-        return 'info';
+  obtenerSeveridadEstado(funcion: Funcion): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
+    const ahora = new Date();
+    const fechaInicio = new Date(funcion.fecha_hora_inicio);
+    const fechaFin = new Date(funcion.fecha_hora_fin);
+    
+    if (fechaInicio > ahora) {
+      return 'success'; // Programada
+    } else if (fechaInicio <= ahora && fechaFin >= ahora) {
+      return 'info'; // En curso
+    } else {
+      return 'secondary'; // Finalizada
     }
   }
 
   /**
-   * Obtiene el texto descriptivo del estado
+   * Obtiene el texto del estado basado en las fechas
    */
-  obtenerTextoEstado(estado: string): string {
-    switch (estado) {
-      case 'activa':
-        return 'activada';
-      case 'cancelada':
-        return 'cancelada';
-      case 'completa':
-        return 'marcada como completa';
-      default:
-        return 'actualizada';
+  obtenerTextoEstado(funcion: Funcion): string {
+    const ahora = new Date();
+    const fechaInicio = new Date(funcion.fecha_hora_inicio);
+    const fechaFin = new Date(funcion.fecha_hora_fin);
+    
+    if (fechaInicio > ahora) {
+      return 'Programada';
+    } else if (fechaInicio <= ahora && fechaFin >= ahora) {
+      return 'En Curso';
+    } else {
+      return 'Finalizada';
     }
   }
 
   /**
    * Formatea la fecha para mostrar
    */
-  formatearFecha(fecha: Date): string {
-    return new Date(fecha).toLocaleDateString('es-ES');
+  formatearFecha(fechaString: string): string {
+    return new Date(fechaString).toLocaleDateString('es-ES');
   }
 
   /**
-   * Formatea la fecha y hora completa
+   * Formatea la fecha y hora para mostrar
    */
-  formatearFechaHora(funcion: Funcion): string {
-    const fecha = new Date(funcion.fecha).toLocaleDateString('es-ES');
-    return `${fecha} - ${funcion.hora}`;
+  formatearFechaHora(fechaString: string): string {
+    const fecha = new Date(fechaString);
+    return `${fecha.toLocaleDateString('es-ES')} ${fecha.toLocaleTimeString('es-ES', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })}`;
   }
 
   /**
-   * Calcula el porcentaje de ocupación
+   * Formatea la duración de minutos a formato legible
    */
-  calcularOcupacion(funcion: Funcion): number {
-    return ((funcion.asientosTotales - funcion.asientosDisponibles) / funcion.asientosTotales) * 100;
+  formatearDuracion(minutos: number): string {
+    const horas = Math.floor(minutos / 60);
+    const mins = minutos % 60;
+    return `${horas}h ${mins}m`;
   }
 
   /**

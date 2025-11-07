@@ -8,37 +8,49 @@ import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
+// import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { DatePickerModule } from 'primeng/datepicker';
+// import { CalendarModule } from 'primeng/calendar';
 import { FileUploadModule } from 'primeng/fileupload';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { MessageService, ConfirmationService, Footer } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { PeliculasService } from '@app/services/peliculas.service';
 import { HeaderAdminComponent } from '../header-admin/header-admin';
 import { FooterComponent } from '@shared/footer/footer';
-import { Supabase } from '@app/services/supabase';
-// Interfaces para tipos de datos
+import { Select, SelectModule } from 'primeng/select';
+
+// Interface alineada con la base de datos
 interface Pelicula {
-  id?: string;
-  titulo: string;
-  descripcion: string;
+  id?: number;
+  nombre: string;
   duracion: number;
-  genero: string[];
-  clasificacion: string;
-  director: string;
-  actores: string[];
-  fechaEstreno: Date;
-  fechaFin: Date;
-  imagenPortada: string;
-  imagenBanner: string;
-  trailerUrl: string;
-  estado: 'activa' | 'inactiva' | 'proximamente';
-  precio: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  categorias: any[]; // IDs de categorías
+  imagen: string;
+  director: string | null;
+  autores: string | null;
+  descripcion: string;
+  estado: 'cartelera' | 'estreno' | 'proximamente' | 'retirada';
+  clasificacion: string | null;
+  url_trailer: string | null;
+  fecha_estreno: string;
+  create_at?: string;
+  update_at?: string | null;
 }
+
+// Mapeo de categorías
+const MAPA_CATEGORIAS: { [key: number]: string } = {
+  1: 'Acción',
+  2: 'Comedia', 
+  3: 'Drama',
+  4: 'Terror',
+  5: 'Aventura',
+  6: 'Romance',
+  7: 'Animación',
+  8: 'Suspenso',
+  9: 'Ciencia Ficción'
+};
 
 @Component({
   selector: 'app-movie-management',
@@ -53,17 +65,18 @@ interface Pelicula {
     ConfirmDialogModule,
     InputTextModule,
     TextareaModule,
-    SelectModule,
+    // DropdownModule,
     MultiSelectModule,
-    DatePickerModule,
+    SelectModule,
+ 
     FileUploadModule,
     TagModule,
     TooltipModule,
     ToastModule,
     HeaderAdminComponent,
     FooterComponent
-],
-  providers: [MessageService, ConfirmationService, HeaderAdminComponent,FooterComponent],
+  ],
+  providers: [MessageService, ConfirmationService, CommonModule, HeaderAdminComponent, FooterComponent],
   templateUrl: './movie-management.html',
   styleUrls: ['./movie-management.scss']
 })
@@ -82,16 +95,16 @@ export class MovieManagementComponent implements OnInit {
   submitted: boolean = false;
 
   // Opciones para dropdowns
-  opcionesGeneros: any[] = [
-    { label: 'Acción', value: 'accion' },
-    { label: 'Aventura', value: 'aventura' },
-    { label: 'Comedia', value: 'comedia' },
-    { label: 'Drama', value: 'drama' },
-    { label: 'Terror', value: 'terror' },
-    { label: 'Ciencia Ficción', value: 'cienciaficcion' },
-    { label: 'Romance', value: 'romance' },
-    { label: 'Animación', value: 'animacion' },
-    { label: 'Documental', value: 'documental' }
+  opcionesCategorias: any[] = [
+    { label: 'Acción', value: 1 },
+    { label: 'Comedia', value: 2 },
+    { label: 'Drama', value: 3 },
+    { label: 'Terror', value: 4 },
+    { label: 'Aventura', value: 5 },
+    { label: 'Romance', value: 6 },
+    { label: 'Animación', value: 7 },
+    { label: 'Suspenso', value: 8 },
+    { label: 'Ciencia Ficción', value: 9 }
   ];
 
   opcionesClasificacion: any[] = [
@@ -103,67 +116,43 @@ export class MovieManagementComponent implements OnInit {
   ];
 
   opcionesEstados: any[] = [
-    { label: 'Activa', value: 'activa' },
-    { label: 'Inactiva', value: 'inactiva' },
-    { label: 'Próximamente', value: 'proximamente' }
+    { label: 'Cartelera', value: 'cartelera' },
+    { label: 'Estreno', value: 'estreno' },
+    { label: 'Próximamente', value: 'proximamente' },
+    { label: 'Retirada', value: 'retirada' }
   ];
 
   constructor(
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private peliculaService: PeliculasService
   ) {}
 
-  ngOnInit() {
-    // Simular carga de datos
-    this.cargarPeliculas();
+  async ngOnInit() {
+    await this.cargarPeliculas();
   }
-
+  
   /**
    * Carga la lista de películas desde el servicio
    */
-  cargarPeliculas() {
+  async cargarPeliculas() {
     this.cargando = true;
-    
-    // Simulación de datos - en producción vendrían de un servicio
-    setTimeout(() => {
-      this.listaPeliculas = [
-        {
-          id: '1',
-          titulo: 'Avatar: The Way of Water',
-          descripcion: 'Jake Sully y Neytiri han formado una familia...',
-          duracion: 192,
-          genero: ['aventura', 'ciencia-ficcion'],
-          clasificacion: 'B',
-          director: 'James Cameron',
-          actores: ['Sam Worthington', 'Zoe Saldana'],
-          fechaEstreno: new Date('2023-12-15'),
-          fechaFin: new Date('2024-02-15'),
-          imagenPortada: 'assets/peliculas/avatar.jpg',
-          imagenBanner: 'assets/peliculas/avatar-banner.jpg',
-          trailerUrl: 'https://youtube.com/avatar2',
-          estado: 'activa',
-          precio: 8.50
-        },
-        {
-          id: '2',
-          titulo: 'The Batman',
-          descripcion: 'Batman explora la corrupción en Gotham City...',
-          duracion: 176,
-          genero: ['accion', 'drama'],
-          clasificacion: 'B15',
-          director: 'Matt Reeves',
-          actores: ['Robert Pattinson', 'Zoë Kravitz'],
-          fechaEstreno: new Date('2023-11-10'),
-          fechaFin: new Date('2024-01-10'),
-          imagenPortada: 'assets/peliculas/batman.jpg',
-          imagenBanner: 'assets/peliculas/batman-banner.jpg',
-          trailerUrl: 'https://youtube.com/batman',
-          estado: 'activa',
-          precio: 7.50
-        }
-      ];
-      this.cargando = false;
-    }, 1000);
+  
+    const { data, error } = await this.peliculaService.obtenerPeliculas();
+  
+    if (error) {
+      console.error('Error cargando películas:', error);
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'No se pudieron cargar las películas.' 
+      });
+    } else {
+      this.listaPeliculas = data || [];
+      console.log('Películas cargadas:', this.listaPeliculas);
+    }
+  
+    this.cargando = false;
   }
 
   /**
@@ -189,60 +178,73 @@ export class MovieManagementComponent implements OnInit {
   /**
    * Guarda la película (crear o actualizar)
    */
-  guardarPelicula() {
-    this.submitted = true;
+ /**
+ * Guarda la película (crear o actualizar)
+ */
+async guardarPelicula() {
+  this.submitted = true;
 
-    // Validación básica
-    if (!this.validarPelicula()) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Por favor complete todos los campos requeridos'
-      });
-      return;
-    }
+  // Convertir fecha a formato ISO si es necesario
+  if (this.peliculaSeleccionada.fecha_estreno && typeof this.peliculaSeleccionada.fecha_estreno !== 'string') {
+    this.peliculaSeleccionada.fecha_estreno = new Date(this.peliculaSeleccionada.fecha_estreno).toISOString().split('T')[0];
+  }
 
-    // Simular guardado
+  if (!this.validarPelicula()) {
+    this.messageService.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: 'Complete los campos obligatorios' 
+    });
+    return;
+  }
+
+  try {
     if (this.esEdicion) {
-      // Actualizar película existente
-      const index = this.listaPeliculas.findIndex(p => p.id === this.peliculaSeleccionada.id);
-      if (index !== -1) {
-        this.listaPeliculas[index] = { ...this.peliculaSeleccionada };
-      }
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'Película actualizada correctamente'
+      const { error } = await this.peliculaService.actualizarPelicula(
+        this.peliculaSeleccionada.id!.toString(), 
+        this.peliculaSeleccionada
+      );
+      
+      if (error) throw error;
+      
+      this.messageService.add({ 
+        severity: 'success', 
+        summary: 'Éxito', 
+        detail: 'Película actualizada correctamente' 
       });
     } else {
-      // Crear nueva película
-      const nuevaPelicula = {
-        ...this.peliculaSeleccionada,
-        id: (this.listaPeliculas.length + 1).toString(),
-        createdAt: new Date()
-      };
-      this.listaPeliculas.push(nuevaPelicula);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'Película creada correctamente'
+      const { error } = await this.peliculaService.crearPelicula(this.peliculaSeleccionada);
+      
+      if (error) throw error;
+      
+      this.messageService.add({ 
+        severity: 'success', 
+        summary: 'Éxito', 
+        detail: 'Película creada correctamente' 
       });
     }
 
     this.mostrarDialogoEdicion = false;
-    this.peliculaSeleccionada = this.crearPeliculaVacia();
+    await this.cargarPeliculas();
+    
+  } catch (error) {
+    console.error('Error guardando película:', error);
+    this.messageService.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: 'Error al guardar la película' 
+    });
   }
+}
 
   /**
    * Valida los datos de la película
    */
   validarPelicula(): boolean {
-    return !!this.peliculaSeleccionada.titulo &&
+    return !!this.peliculaSeleccionada.nombre &&
            !!this.peliculaSeleccionada.descripcion &&
-           !!this.peliculaSeleccionada.director &&
-           this.peliculaSeleccionada.genero.length > 0 &&
-           !!this.peliculaSeleccionada.clasificacion &&
-           !!this.peliculaSeleccionada.fechaEstreno;
+           this.peliculaSeleccionada.categorias.length > 0 &&
+           !!this.peliculaSeleccionada.fecha_estreno;
   }
 
   /**
@@ -250,7 +252,7 @@ export class MovieManagementComponent implements OnInit {
    */
   confirmarEliminacion(pelicula: Pelicula) {
     this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar "${pelicula.titulo}"?`,
+      message: `¿Estás seguro de eliminar "${pelicula.nombre}"?`,
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, eliminar',
@@ -262,27 +264,74 @@ export class MovieManagementComponent implements OnInit {
   /**
    * Elimina una película
    */
-  eliminarPelicula(id: string) {
-    this.listaPeliculas = this.listaPeliculas.filter(p => p.id !== id);
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Éxito',
-      detail: 'Película eliminada correctamente'
-    });
+  async eliminarPelicula(id: number) {
+    try {
+      await this.peliculaService.eliminarPelicula(id.toString());
+      this.messageService.add({ 
+        severity: 'success', 
+        summary: 'Éxito', 
+        detail: 'Película eliminada correctamente' 
+      });
+      await this.cargarPeliculas();
+    } catch (error) {
+      console.error('Error eliminando película:', error);
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'Error al eliminar la película' 
+      });
+    }
   }
 
   /**
    * Cambia el estado de una película
    */
-  cambiarEstadoPelicula(pelicula: Pelicula) {
-    const nuevoEstado = pelicula.estado === 'activa' ? 'inactiva' : 'activa';
-    pelicula.estado = nuevoEstado;
+  async cambiarEstadoPelicula(pelicula: Pelicula) {
+    const nuevoEstado = this.obtenerSiguienteEstado(pelicula.estado);
     
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Éxito',
-      detail: `Película ${nuevoEstado === 'activa' ? 'activada' : 'desactivada'}`
-    });
+    try {
+      await this.peliculaService.actualizarPelicula(
+        pelicula.id!.toString(), 
+        { estado: nuevoEstado }
+      );
+      
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: `Película ${this.formatearEstado(nuevoEstado)}`
+      });
+      
+      await this.cargarPeliculas();
+    } catch (error) {
+      console.error('Error cambiando estado:', error);
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'Error al cambiar el estado' 
+      });
+    }
+  }
+
+  /**
+   * Obtiene el siguiente estado
+   */
+  private obtenerSiguienteEstado(estadoActual: string): string {
+    const estados = ['proximamente', 'estreno', 'cartelera', 'retirada'];
+    const indexActual = estados.indexOf(estadoActual);
+    return estados[(indexActual + 1) % estados.length];
+  }
+
+  /**
+   * Formatea el estado para mostrar
+   */
+  private formatearEstado(estado: string): string {
+    const estados: { [key: string]: string } = {
+      'proximamente': 'marcada como próximamente',
+      'estreno': 'marcada como estreno', 
+      'cartelera': 'marcada en cartelera',
+      'retirada': 'retirada de cartelera'
+    };
+    return estados[estado] || estado;
   }
 
   /**
@@ -290,20 +339,17 @@ export class MovieManagementComponent implements OnInit {
    */
   crearPeliculaVacia(): Pelicula {
     return {
-      titulo: '',
+      nombre: '',
       descripcion: '',
-      duracion: 0,
-      genero: [],
-      clasificacion: '',
+      duracion: 120,
+      categorias: [],
+      imagen: '',
       director: '',
-      actores: [],
-      fechaEstreno: new Date(),
-      fechaFin: new Date(),
-      imagenPortada: '',
-      imagenBanner: '',
-      trailerUrl: '',
-      estado: 'activa',
-      precio: 0
+      autores: '',
+      estado: 'proximamente',
+      clasificacion: 'A',
+      url_trailer: '',
+      fecha_estreno: new Date().toISOString().split('T')[0]
     };
   }
 
@@ -312,65 +358,65 @@ export class MovieManagementComponent implements OnInit {
    */
   obtenerSeveridadEstado(estado: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
     switch (estado) {
-      case 'activa':
+      case 'cartelera':
         return 'success';
-      case 'inactiva':
-        return 'danger';
+      case 'estreno':
+        return 'info';
       case 'proximamente':
         return 'warn';
+      case 'retirada':
+        return 'danger';
       default:
         return 'info';
     }
   }
 
   /**
-   * Formatea los géneros para mostrar
+   * Formatea las categorías para mostrar
    */
-  formatearGeneros(generos: string[]): string {
-    return generos.map(gen => 
-      this.opcionesGeneros.find(g => g.value === gen)?.label || gen
-    ).join(', ');
+  formatearCategorias(categorias: any[]): string {
+    if (!categorias || !Array.isArray(categorias)) return '';
+    
+    return categorias
+      .map(catId => MAPA_CATEGORIAS[catId] || `Categoría ${catId}`)
+      .join(', ');
   }
 
   /**
    * Maneja la subida de imágenes
    */
-  onUploadImagen(event: any, tipo: 'portada' | 'banner') {
-    // En producción, aquí se subiría al servidor
+  onUploadImagen(event: any) {
     const file = event.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        if (tipo === 'portada') {
-          this.peliculaSeleccionada.imagenPortada = e.target.result;
-        } else {
-          this.peliculaSeleccionada.imagenBanner = e.target.result;
-        }
+        this.peliculaSeleccionada.imagen = e.target.result;
       };
       reader.readAsDataURL(file);
     }
   }
-  /**
- * Cancela el formulario y cierra el diálogo
- */
-cancelarFormulario() {
-  this.mostrarDialogoEdicion = false;
-  this.submitted = false;
-  this.peliculaSeleccionada = this.crearPeliculaVacia();
-  
-  this.messageService.add({
-    severity: 'info',
-    summary: 'Cancelado',
-    detail: 'Los cambios no fueron guardados',
-    life: 3000
-  });
-}
 
-/**
- * Maneja el cierre del diálogo
- */
-onHideDialog() {
-  this.submitted = false;
-  this.peliculaSeleccionada = this.crearPeliculaVacia();
-}
+  /**
+   * Cancela el formulario y cierra el diálogo
+   */
+  cancelarFormulario() {
+    this.mostrarDialogoEdicion = false;
+    this.submitted = false;
+    this.peliculaSeleccionada = this.crearPeliculaVacia();
+    
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Cancelado',
+      detail: 'Los cambios no fueron guardados',
+      life: 3000
+    });
+  }
+
+  /**
+   * Maneja el cierre del diálogo
+   */
+  onHideDialog() {
+    this.submitted = false;
+    this.peliculaSeleccionada = this.crearPeliculaVacia();
+  }
 }
