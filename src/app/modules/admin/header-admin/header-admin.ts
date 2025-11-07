@@ -9,7 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
-  selector: 'app-header',
+  selector: 'app-header-admin',
   standalone: true,
   imports: [
     CommonModule,
@@ -20,10 +20,10 @@ import { TooltipModule } from 'primeng/tooltip';
     InputTextModule,
     TooltipModule
   ],
-  templateUrl: './header.html',
-  styleUrls: ['./header.scss']
+  templateUrl: './header-admin.html',
+  styleUrls: ['./header-admin.scss']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderAdminComponent implements OnInit {
   @Input() mostrarBotonMenu: boolean = false;
   @Input() mostrarBuscador: boolean = true;
   @Output() menuAlternado = new EventEmitter<void>();
@@ -49,10 +49,11 @@ export class HeaderComponent implements OnInit {
 
   // Datos de ejemplo
   itemsNavegacion = [
-    { texto: 'Cartelera', icono: 'pi pi-play', ruta: '/user/cartelera' },
-    { texto: 'Estrenos', icono: 'pi pi-star', ruta: '/estrenos' },
-    { texto: 'Próximamente', icono: 'pi pi-calendar', ruta: '/proximamente' },
-    // { texto: 'Promociones', icono: 'pi pi-tag', ruta: '/promociones' }
+    { texto: 'Inicio', icono: 'pi pi-home', ruta: '/admin/dashboard' },
+    { texto: 'Peliculas', icono: 'pi pi-video', ruta: '/admin/movie-management' },
+    { texto: 'Funciones', icono: 'pi pi-ticket', ruta: '/admin/movie-showtimes-management' },
+    { texto: 'Usuario', icono: 'pi pi-calendar', ruta: '/admin/user-management' },
+    { texto: 'Reportes', icono: 'pi pi-tag', ruta: '/promociones' }
   ];
 
   sugerencias = [

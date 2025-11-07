@@ -1,1 +1,469 @@
-<p>user-management works!</p>
+<app-header-admin></app-header-admin>
+<div class="gestionUsuariosContainer">
+    <!-- Toast para notificaciones -->
+    <p-toast></p-toast>
+    
+    <!-- Diálogo de confirmación -->
+    <p-confirmDialog></p-confirmDialog>
+  
+    <!-- Header con título y acciones -->
+    <div class="headerAcciones">
+      <div class="headerInfo">
+        <h1 class="tituloPagina">Gestión de Usuarios</h1>
+        <p class="descripcionPagina">Administra usuarios, roles y permisos del sistema</p>
+      </div>
+      
+      <button 
+        pButton 
+        label="Nuevo Usuario" 
+        icon="pi pi-user-plus" 
+        class="p-button-primary botonNuevoUsuario"
+        (click)="abrirDialogoNuevoUsuario()">
+      </button>
+    </div>
+  
+    <!-- Estadísticas Rápidas -->
+    <div class="estadisticasUsuarios">
+      <div class="tarjetaEstadistica">
+        <div class="estadisticaIcono" style="background: #3b82f6;">
+          <i class="pi pi-users"></i>
+        </div>
+        <div class="estadisticaContenido">
+          <h3>{{ estadisticasUsuarios.total }}</h3>
+          <p>Total Usuarios</p>
+        </div>
+      </div>
+      
+      <div class="tarjetaEstadistica">
+        <div class="estadisticaIcono" style="background: #10b981;">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <div class="estadisticaContenido">
+          <h3>{{ estadisticasUsuarios.activos }}</h3>
+          <p>Usuarios Activos</p>
+          <span class="porcentaje">{{ estadisticasUsuarios.porcentajeActivos | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+      
+      <div class="tarjetaEstadistica">
+        <div class="estadisticaIcono" style="background: #8b5cf6;">
+          <i class="pi pi-graduation-cap"></i>
+        </div>
+        <div class="estadisticaContenido">
+          <h3>{{ estadisticasUsuarios.estudiantes }}</h3>
+          <p>Estudiantes</p>
+        </div>
+      </div>
+      
+      <div class="tarjetaEstadistica">
+        <div class="estadisticaIcono" style="background: #e30614;">
+          <i class="pi pi-cog"></i>
+        </div>
+        <div class="estadisticaContenido">
+          <h3>{{ estadisticasUsuarios.administradores }}</h3>
+          <p>Administradores</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Filtros -->
+    <div class="filtrosContainer">
+      <div class="filtrosGrupo">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            placeholder="Buscar por nombre o email..." 
+            [(ngModel)]="terminoBusqueda" />
+        </span>
+        
+        <select 
+          pInputText
+          [(ngModel)]="filtroRol"
+          class="filtroSelect">
+          <option value="">Todos los roles</option>
+          <option *ngFor="let rol of rolesSistema" [value]="rol.value">
+            {{ rol.label }}
+          </option>
+        </select>
+        
+        <select 
+          pInputText
+          [(ngModel)]="filtroEstado"
+          class="filtroSelect">
+          <option value="">Todos los estados</option>
+          <option *ngFor="let estado of opcionesEstados" [value]="estado.value">
+            {{ estado.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+  
+    <!-- Tabla de usuarios -->
+    <div class="tablaContainer">
+      <p-table 
+        [value]="usuariosFiltrados" 
+        [loading]="cargando"
+        [paginator]="true" 
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        styleClass="p-datatable-striped p-datatable-gridlines"
+        dataKey="id">
+        
+        <!-- Header de la tabla -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Fecha Registro</th>
+            <th>Último Acceso</th>
+            <th>Reservas</th>
+            <th style="width: 180px">Acciones</th>
+          </tr>
+        </ng-template>
+  
+        <!-- Template de loading -->
+        <ng-template pTemplate="loadingbody">
+          <tr>
+            <td colspan="7" class="text-center">
+              <div class="cargandoContainer">
+                <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                <p>Cargando usuarios...</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+  
+        <!-- Body de la tabla -->
+        <ng-template pTemplate="body" let-usuario>
+          <tr>
+            <!-- Columna Usuario -->
+            <td>
+              <div class="infoUsuario">
+                <p-avatar 
+                  [label]="obtenerIniciales(usuario.nombre)" 
+                  styleClass="mr-2" 
+                  size="large" 
+                  shape="circle"
+                  [style]="{'background-color': obtenerInfoRol(usuario.rol).color, 'color': '#fff'}">
+                </p-avatar>
+                <div class="detallesUsuario">
+                  <h4 class="nombreUsuario">{{ usuario.nombre }}</h4>
+                  <p class="emailUsuario">{{ usuario.email }}</p>
+                  <p class="infoAdicional" *ngIf="usuario.carrera || usuario.telefono">
+                    {{ usuario.carrera }} {{ usuario.telefono ? '· ' + usuario.telefono : '' }}
+                  </p>
+                </div>
+              </div>
+            </td>
+  
+            <!-- Columna Rol -->
+            <td>
+              <div class="infoRol">
+                <p-tag 
+                  [value]="obtenerNombreRol(usuario.rol)"
+                  [severity]="obtenerSeveridadRol(usuario.rol)"
+                  [icon]="obtenerInfoRol(usuario.rol).icono">
+                </p-tag>
+                <small class="descripcionRol">{{ obtenerInfoRol(usuario.rol).descripcion }}</small>
+              </div>
+            </td>
+  
+            <!-- Columna Estado -->
+            <td>
+              <p-tag 
+                [value]="usuario.estado | titlecase"
+                [severity]="obtenerSeveridadEstado(usuario.estado)">
+              </p-tag>
+            </td>
+  
+            <!-- Columna Fecha Registro -->
+            <td>
+              <span class="fechaRegistro">
+                {{ formatearFecha(usuario.fechaRegistro) }}
+              </span>
+            </td>
+  
+            <!-- Columna Último Acceso -->
+            <td>
+              <span class="ultimoAcceso" *ngIf="usuario.ultimoAcceso; else sinAcceso">
+                {{ formatearFechaHora(usuario.ultimoAcceso) }}
+              </span>
+              <ng-template #sinAcceso>
+                <span class="sinAcceso">Nunca</span>
+              </ng-template>
+            </td>
+  
+            <!-- Columna Reservas -->
+            <td>
+              <div class="infoReservas">
+                <p-badge 
+                  [value]="usuario.reservasRealizadas" 
+                  severity="info"
+                  *ngIf="usuario.rol === 'estudiante' && usuario.reservasRealizadas > 0">
+                </p-badge>
+                <span *ngIf="usuario.rol !== 'estudiante'">-</span>
+              </div>
+            </td>
+  
+            <!-- Columna Acciones -->
+            <td>
+              <div class="accionesUsuario">
+                <!-- Botón Editar -->
+                <button 
+                  pButton 
+                  icon="pi pi-pencil" 
+                  class="p-button-rounded p-button-text p-button-sm botonEditar"
+                  pTooltip="Editar usuario"
+                  tooltipPosition="top"
+                  (click)="abrirDialogoEditarUsuario(usuario)">
+                </button>
+  
+                <!-- Botón Cambiar Estado -->
+                <button 
+                  pButton 
+                  [icon]="usuario.estado === 'activo' ? 'pi pi-lock' : 'pi pi-lock-open'" 
+                  class="p-button-rounded p-button-text p-button-sm"
+                  [ngClass]="{
+                    'botonDesactivar': usuario.estado === 'activo',
+                    'botonActivar': usuario.estado !== 'activo'
+                  }"
+                  [pTooltip]="usuario.estado === 'activo' ? 'Desactivar' : 'Activar'"
+                  tooltipPosition="top"
+                  (click)="cambiarEstadoUsuario(usuario, usuario.estado === 'activo' ? 'inactivo' : 'activo')">
+                </button>
+  
+                <!-- Menú de Roles -->
+                <p-button 
+                  icon="pi pi-users" 
+                  class="p-button-rounded p-button-text p-button-sm botonRoles"
+                  pTooltip="Cambiar rol"
+                  tooltipPosition="top"
+                  (click)="menuRoles.toggle($event)">
+                </p-button>
+                <p-menu #menuRoles [model]="obtenerOpcionesRoles(usuario)" [popup]="true"></p-menu>
+  
+                <!-- Botón Eliminar -->
+                <button 
+                  pButton 
+                  icon="pi pi-trash" 
+                  class="p-button-rounded p-button-text p-button-sm p-button-danger botonEliminar"
+                  pTooltip="Eliminar usuario"
+                  tooltipPosition="top"
+                  (click)="confirmarEliminacion(usuario)">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+  
+        <!-- Template cuando no hay datos -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center vacioContainer">
+              <div class="vacioContent">
+                <i class="pi pi-users" style="font-size: 3rem; color: #ccc;"></i>
+                <h3>No hay usuarios</h3>
+                <p *ngIf="terminoBusqueda || filtroRol || filtroEstado">
+                  No se encontraron usuarios con los filtros aplicados
+                </p>
+                <p *ngIf="!terminoBusqueda && !filtroRol && !filtroEstado">
+                  Comienza agregando tu primer usuario
+                </p>
+                <button 
+                  pButton 
+                  label="Agregar Primer Usuario" 
+                  icon="pi pi-user-plus" 
+                  class="p-button-primary"
+                  (click)="abrirDialogoNuevoUsuario()">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  
+    <!-- Diálogo de Edición/Creación -->
+    <p-dialog 
+      [(visible)]="mostrarDialogoEdicion" 
+      [style]="{ width: '90vw', maxWidth: '600px' }"
+      [modal]="true" 
+      [closable]="true"
+      [draggable]="false"
+      [resizable]="false"
+      (onHide)="onHideDialog()"
+      [header]="esEdicion ? 'Editar Usuario' : 'Nuevo Usuario'">
+      
+      <form (ngSubmit)="guardarUsuario()" #formUsuario="ngForm">
+        <div class="formularioUsuario">
+          
+          <!-- Sección Información Básica -->
+          <div class="seccionFormulario">
+            <h3 class="tituloSeccion">Información Personal</h3>
+            
+            <div class="campoFormulario campoObligatorio">
+              <label for="nombre">Nombre Completo *</label>
+              <input 
+                id="nombre"
+                type="text" 
+                pInputText 
+                [(ngModel)]="usuarioSeleccionado.nombre" 
+                name="nombre"
+                placeholder="Ingresa el nombre completo"
+                [class]="{'ng-invalid ng-dirty': submitted && !usuarioSeleccionado.nombre}" />
+              <small 
+                class="errorValidacion" 
+                *ngIf="submitted && !usuarioSeleccionado.nombre">
+                El nombre es requerido
+              </small>
+            </div>
+  
+            <div class="campoFormulario campoObligatorio">
+              <label for="email">Email *</label>
+              <input 
+                id="email"
+                type="email" 
+                pInputText 
+                [(ngModel)]="usuarioSeleccionado.email" 
+                name="email"
+                placeholder="usuario@uleam.edu.ec"
+                [class]="{'ng-invalid ng-dirty': submitted && !usuarioSeleccionado.email}" />
+              <small 
+                class="errorValidacion" 
+                *ngIf="submitted && !usuarioSeleccionado.email">
+                El email es requerido
+              </small>
+            </div>
+  
+            <div class="camposGrid">
+              <div class="campoFormulario">
+                <label for="telefono">Teléfono</label>
+                <input 
+                  id="telefono"
+                  type="tel" 
+                  pInputText 
+                  [(ngModel)]="usuarioSeleccionado.telefono" 
+                  name="telefono"
+                  placeholder="0987654321" />
+              </div>
+  
+              <div class="campoFormulario">
+                <label for="carrera">Carrera</label>
+                <input 
+                  id="carrera"
+                  type="text" 
+                  pInputText 
+                  [(ngModel)]="usuarioSeleccionado.carrera" 
+                  name="carrera"
+                  placeholder="Ingeniería en Sistemas" />
+              </div>
+            </div>
+          </div>
+  
+          <!-- Sección Rol y Estado -->
+          <div class="seccionFormulario">
+            <h3 class="tituloSeccion">Rol y Estado</h3>
+            
+            <div class="camposGrid">
+              <div class="campoFormulario campoObligatorio">
+                <label for="rol">Rol del Usuario *</label>
+                <select 
+                  id="rol"
+                  pInputText
+                  [(ngModel)]="usuarioSeleccionado.rol" 
+                  name="rol"
+                  [class]="{'ng-invalid ng-dirty': submitted && !usuarioSeleccionado.rol}">
+                  <option *ngFor="let rol of rolesSistema" [value]="rol.value">
+                    {{ rol.label }}
+                  </option>
+                </select>
+                <small 
+                  class="errorValidacion" 
+                  *ngIf="submitted && !usuarioSeleccionado.rol">
+                  El rol es requerido
+                </small>
+              </div>
+  
+              <div class="campoFormulario">
+                <label for="estado">Estado</label>
+                <select 
+                  id="estado"
+                  pInputText
+                  [(ngModel)]="usuarioSeleccionado.estado" 
+                  name="estado">
+                  <option *ngFor="let estado of opcionesEstados" [value]="estado.value">
+                    {{ estado.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Información del Rol Seleccionado -->
+          <div class="infoRolSeleccionado" *ngIf="usuarioSeleccionado.rol">
+            <h4>Permisos del Rol: {{ obtenerNombreRol(usuarioSeleccionado.rol) }}</h4>
+            <div class="listaPermisos">
+              <span class="permisoItem" *ngIf="usuarioSeleccionado.rol === 'estudiante'">
+                <i class="pi pi-check"></i>
+                Ver Cartelera
+              </span>
+              <span class="permisoItem" *ngIf="usuarioSeleccionado.rol === 'estudiante'">
+                <i class="pi pi-check"></i>
+                Realizar Reservas
+              </span>
+              <span class="permisoItem" *ngIf="usuarioSeleccionado.rol === 'estudiante'">
+                <i class="pi pi-check"></i>
+                Ver Historial
+              </span>
+              <span class="permisoItem" *ngIf="usuarioSeleccionado.rol === 'administrador'">
+                <i class="pi pi-check"></i>
+                Gestionar Usuarios
+              </span>
+              <span class="permisoItem" *ngIf="usuarioSeleccionado.rol === 'administrador'">
+                <i class="pi pi-check"></i>
+                Gestionar Películas
+              </span>
+              <span class="permisoItem" *ngIf="usuarioSeleccionado.rol === 'administrador'">
+                <i class="pi pi-check"></i>
+                Gestionar Funciones
+              </span>
+              <span class="permisoItem" *ngIf="usuarioSeleccionado.rol === 'control_acceso'">
+                <i class="pi pi-check"></i>
+                Validar QR
+              </span>
+              <span class="permisoItem" *ngIf="usuarioSeleccionado.rol === 'control_acceso'">
+                <i class="pi pi-check"></i>
+                Gestionar Asistencia
+              </span>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Footer del diálogo con botones -->
+        <ng-template pTemplate="footer">
+          <div class="footerFormulario">
+            <button 
+              pButton 
+              label="Cancelar" 
+              icon="pi pi-times" 
+              class="p-button-text botonCancelar"
+              type="button"
+              (click)="cancelarFormulario()">
+            </button>
+            
+            <button 
+              pButton 
+              [label]="esEdicion ? 'Actualizar Usuario' : 'Crear Usuario'" 
+              [icon]="esEdicion ? 'pi pi-check' : 'pi pi-user-plus'" 
+              class="p-button-primary botonGuardar"
+              type="submit">
+            </button>
+          </div>
+        </ng-template>
+      </form>
+    </p-dialog>
+  </div>
+  <app-footer></app-footer>
