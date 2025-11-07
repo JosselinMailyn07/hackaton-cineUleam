@@ -1,6 +1,26 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+     {
+        path: 'auth',
+        redirectTo: 'auth/login',
+        pathMatch: 'full'
+    },
+    {
+        path: 'admin',
+        redirectTo: 'admin/dashboard',
+        pathMatch: 'full'
+    },
+    {
+        path: 'user',
+        redirectTo: 'user/cartelera',
+        pathMatch: 'full'
+    },
+    {
+        path: 'access',
+        redirectTo: 'access/qr-scanner',
+        pathMatch: 'full'
+    },
     {
         path: 'auth',
         loadChildren: () => import('@modules/auth/auth.routes').then(m => m.routesAuth)
@@ -17,6 +37,7 @@ export const routes: Routes = [
         path: 'access',
         loadChildren: () => import('@modules/access/access.routes').then(m => m.routesAccess)
     },
+   
     {
         path: '',
         redirectTo: 'auth',
@@ -28,3 +49,4 @@ export const routes: Routes = [
         pathMatch: 'full'
     }
 ];
+

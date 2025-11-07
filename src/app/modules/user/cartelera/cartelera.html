@@ -1,17 +1,13 @@
 <app-header></app-header>
 
-<!-- Contenedor principal -->
 <div class="w-full p-6" style="min-height: 80vh;">
 
-  <!-- Indicador de Carga (como en tu login) -->
   @if (cargando) {
-    <app-loader [visible]="cargando"></app-loader>
+    <app-loader [visible]="true"></app-loader>
   }
 
-  <!-- Contenido de la Cartelera (cuando no está cargando) -->
   @if (!cargando) {
-    
-    <!-- Título Principal -->
+
     <div class="mb-12 text-center">
       <h1 class="text-4xl font-bold text-[var(--color-primario)] mb-2">
         Cartelera de Películas
@@ -19,86 +15,63 @@
       <div class="w-16 h-1 mx-auto rounded-full bg-[var(--color-primario)]"></div>
     </div>
 
-    <!-- Carrusel 1: En Cartelera -->
+    <!-- EN CARTELERA -->
     <div class="mb-10">
-      <h2 class="text-2xl font-semibold text-gray-700 dark:text-black-300 mb-4">En Cartelera</h2>
-      <p-carousel
-        [value]="peliculasEnCartelera" 
-        [numVisible]="3"
-        [numScroll]="1"
-        [responsiveOptions]="opcionesResponsivas"
-        circular="true"
-        [showIndicators]="false"
-      >
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">En Cartelera</h2>
+      <p-carousel [value]="peliculasEnCartelera" [numVisible]="3" [numScroll]="1"
+                  [responsiveOptions]="opcionesResponsivas" [showIndicators]="false">
         <ng-template pTemplate="item" let-pelicula>
-          <!-- Aquí se usan tus clases de 'cartelera.component.scss' -->
           <div class="tarjeta-pelicula">
             <div class="relative">
-              <!-- Datos de la DB: pelicula.imagen, pelicula.nombre -->
-              <img [src]="pelicula.imagen" [alt]="pelicula.nombre" class="imagen-pelicula" />
-              <!-- Dato de la DB: pelicula.estado -->
+              <img [src]="pelicula.imagen" class="imagen-pelicula" />
               <span class="etiqueta-pelicula">{{ pelicula.estado | uppercase }}</span>
             </div>
-            
             <div class="info-pelicula">
-              <!-- Dato de la DB: pelicula.clasificacion -->
-              <span *ngIf="pelicula.clasificacion" class="categoria-pelicula">{{ pelicula.clasificacion }}</span>
-              
-              <!-- Dato de la DB: pelicula.nombre -->
+              <span class="categoria-pelicula">{{ pelicula.categoriaNombre }}</span>
               <h3 class="titulo-pelicula">{{ pelicula.nombre }}</h3>
-              <!-- Dato de la DB: pelicula.descripcion -->
               <p class="descripcion-pelicula">{{ pelicula.descripcion }}</p>
-              
-              <!-- Conectado a la función verDetalle() -->
-              <button pButton 
-                      label="Ver detalles" 
-                      (click)="verDetalle(pelicula)"
-                      class="p-button-primary w-auto">
-              </button>
+
+              <div class="flex gap-2 mt-3">
+                <button pButton label="Ver detalles" class="p-button-primary" (click)="verDetalle(pelicula)"></button>
+                <button pButton label="Reservar" icon="pi pi-ticket" class="p-button-success"
+                        (click)="abrirHorarios(pelicula)"></button>
+              </div>
             </div>
           </div>
         </ng-template>
       </p-carousel>
     </div>
 
-    <!-- Carrusel 2: Próximos Estrenos -->
+    <!-- PRÓXIMOS ESTRENOS -->
     <div>
-      <h2 class="text-2xl font-semibold text-gray-700 dark:text-black-300 mb-4">Próximos Estrenos</h2>
-      <p-carousel
-        [value]="peliculasProximas" 
-        [numVisible]="3"
-        [numScroll]="1"
-        [responsiveOptions]="opcionesResponsivas"
-        circular="true"
-        [showIndicators]="false"
-      >
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Próximos Estrenos</h2>
+      <p-carousel [value]="peliculasProximas" [numVisible]="3" [numScroll]="1"
+                  [responsiveOptions]="opcionesResponsivas" [showIndicators]="false">
         <ng-template pTemplate="item" let-pelicula>
-          <!-- Reutiliza exactamente el mismo template -->
           <div class="tarjeta-pelicula">
             <div class="relative">
-              <img [src]="pelicula.imagen" [alt]="pelicula.nombre" class="imagen-pelicula" />
+              <img [src]="pelicula.imagen" class="imagen-pelicula" />
               <span class="etiqueta-pelicula">{{ pelicula.estado | uppercase }}</span>
             </div>
-            
             <div class="info-pelicula">
-              <span *ngIf="pelicula.clasificacion" class="categoria-pelicula">{{ pelicula.clasificacion }}</span>
+              <span class="categoria-pelicula">{{ pelicula.categoriaNombre }}</span>
               <h3 class="titulo-pelicula">{{ pelicula.nombre }}</h3>
               <p class="descripcion-pelicula">{{ pelicula.descripcion }}</p>
-              <button pButton 
-                      label="Ver detalles" 
-                      (click)="verDetalle(pelicula)"
-                      class="p-button-primary w-auto">
-              </button>
+              <div class="flex gap-2 mt-3">
+                <button pButton label="Ver detalles" (click)="verDetalle(pelicula)" class="p-button-primary"></button>
+                <button pButton label="Reservar" icon="pi pi-ticket" class="p-button-success"
+                        (click)="abrirHorarios(pelicula)"></button>
+              </div>
             </div>
           </div>
         </ng-template>
       </p-carousel>
     </div>
 
-  } <!-- Fin de @if (!cargando) -->
+  }
 </div>
 
-<!-- Modal de Horarios -->
+<!-- ✅ Modal de horarios -->
 <app-horario-pelicula
   [(visible)]="mostrarModalHorarios"
   [peliculaSeleccionada]="peliculaSeleccionada">

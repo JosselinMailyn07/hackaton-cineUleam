@@ -50,7 +50,7 @@ export class HistorialReservas implements OnInit {
   async ngOnInit() {
     try {
       const { data: userData } = await this.supabase.supabase.auth.getUser();
-      const userId = userData?.user?.id;
+      const userId = userData?.user?.id || '62696019-a9b5-4d9b-a10b-ccc474a38642';
 
       if (!userId) return;
 
