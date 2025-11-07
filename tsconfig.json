@@ -3,6 +3,27 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@env": [
+        "src/environments/environment.ts"
+      ],
+      "@shared/*": [
+        "src/app/modules/shared/*"
+      ],
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@modules/*": [
+        "src/app/modules/*"
+      ],
+      "@services/*": [
+        "src/app/services/*"
+      ],
+      "@pipes/*": [
+        "src/app/pipes/*"
+      ]
+    },
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
