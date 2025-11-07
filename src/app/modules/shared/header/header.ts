@@ -143,7 +143,7 @@ export class HeaderComponent implements OnInit {
       {
         label: 'Mis Reservas',
         icon: 'pi pi-ticket',
-        routerLink: '/reservas',
+        routerLink: '/user/historial-reservas',
         command: () => this.cerrarMenuUsuario()
       },
       {
