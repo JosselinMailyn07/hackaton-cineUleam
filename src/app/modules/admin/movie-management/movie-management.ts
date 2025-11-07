@@ -160,23 +160,6 @@ export class MovieManagementComponent implements OnInit {
           trailerUrl: 'https://youtube.com/batman',
           estado: 'activa',
           precio: 7.50
-        },
-        {
-          id: '3',
-          titulo: 'Spider-Man: No Way Home',
-          descripcion: 'Peter Parker desenmascarado y no puede separar...',
-          duracion: 148,
-          genero: ['accion', 'aventura'],
-          clasificacion: 'B',
-          director: 'Jon Watts',
-          actores: ['Tom Holland', 'Zendaya'],
-          fechaEstreno: new Date('2023-12-17'),
-          fechaFin: new Date('2024-02-17'),
-          imagenPortada: 'assets/peliculas/spiderman.jpg',
-          imagenBanner: 'assets/peliculas/spiderman-banner.jpg',
-          trailerUrl: 'https://youtube.com/spiderman',
-          estado: 'proximamente',
-          precio: 8.00
         }
       ];
       this.cargando = false;
@@ -211,6 +194,11 @@ export class MovieManagementComponent implements OnInit {
 
     // Validación básica
     if (!this.validarPelicula()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Por favor complete todos los campos requeridos'
+      });
       return;
     }
 
@@ -375,53 +363,6 @@ cancelarFormulario() {
     summary: 'Cancelado',
     detail: 'Los cambios no fueron guardados',
     life: 3000
-  });
-}
-
-/**
- * Guarda la película como borrador
- */
-guardarBorrador() {
-  if (!this.validarPelicula()) {
-    this.messageService.add({
-      severity: 'warn',
-      summary: 'Validación',
-      detail: 'Complete los campos requeridos para guardar como borrador',
-      life: 5000
-    });
-    return;
-  }
-
-  // Simular guardado como borrador
-  const peliculaBorrador:Pelicula = {
-    ...this.peliculaSeleccionada,
-    estado: 'inactiva' // Los borradores se guardan como inactivos
-  };
-
-  if (this.esEdicion) {
-    // Actualizar película existente como borrador
-    const index = this.listaPeliculas.findIndex(p => p.id === peliculaBorrador.id);
-    if (index !== -1) {
-      this.listaPeliculas[index] = peliculaBorrador;
-    }
-  } else {
-    // Crear nueva película como borrador
-    const nuevaPelicula = {
-      ...peliculaBorrador,
-      id: (this.listaPeliculas.length + 1).toString(),
-      createdAt: new Date()
-    };
-    this.listaPeliculas.push(nuevaPelicula);
-  }
-
-  this.mostrarDialogoEdicion = false;
-  this.peliculaSeleccionada = this.crearPeliculaVacia();
-  
-  this.messageService.add({
-    severity: 'success',
-    summary: 'Borrador Guardado',
-    detail: 'La película fue guardada como borrador',
-    life: 5000
   });
 }
 
