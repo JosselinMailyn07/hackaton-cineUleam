@@ -6,7 +6,7 @@
       <div class="w-16 h-1 mx-auto rounded-full bg-[var(--color-primario)]"></div>
     </div>
   
-    <!-- Carrusel de películas -->
+    <!-- Carrusel 1 -->
     <p-carousel
       [value]="peliculas"
       [numVisible]="3"
@@ -14,19 +14,41 @@
       [responsiveOptions]="opcionesResponsivas"
       circular="true"
       autoplayInterval="4000"
+      [showIndicators]="false"
+      class="mb-10"
     >
       <ng-template pTemplate="item" let-pelicula>
         <div class="tarjeta-pelicula">
-          <img
-            [src]="pelicula.imagen"
-            [alt]="pelicula.titulo"
-            class="imagen-pelicula"
-          />
+          <img [src]="pelicula.imagen" [alt]="pelicula.titulo" class="imagen-pelicula" />
           <div class="info-pelicula">
             <span class="categoria-pelicula">{{ pelicula.categoria }}</span>
             <h3 class="titulo-pelicula">{{ pelicula.titulo }}</h3>
             <p class="descripcion-pelicula">{{ pelicula.descripcion }}</p>
-            <button pButton label="{{ pelicula.textoBoton }}" class="p-button-primary w-full"></button>
+            <button pButton label="{{ pelicula.textoBoton }}" class="p-button-primary w-auto"></button>
+          </div>
+        </div>
+      </ng-template>
+    </p-carousel>
+  
+    <!-- Carrusel 2 (ES UNA COPIA DEL 1 PILAS!!) -->
+    <p-carousel
+      [value]="peliculas"
+      [numVisible]="3"
+      [numScroll]="1"
+      [responsiveOptions]="opcionesResponsivas"
+      circular="true"
+      autoplayInterval="4000"
+      [showIndicators]="false"
+      
+    >
+      <ng-template pTemplate="item" let-pelicula>
+        <div class="tarjeta-pelicula">
+          <img [src]="pelicula.imagen" [alt]="pelicula.titulo" class="imagen-pelicula" />
+          <div class="info-pelicula">
+            <span class="categoria-pelicula">{{ pelicula.categoria }}</span>
+            <h3 class="titulo-pelicula">{{ pelicula.titulo }}</h3>
+            <p class="descripcion-pelicula">{{ pelicula.descripcion }}</p>
+            <button pButton label="{{ pelicula.textoBoton }}" class="p-button-primary w-auto"></button>
           </div>
         </div>
       </ng-template>

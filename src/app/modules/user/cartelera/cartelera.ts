@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CarouselModule } from 'primeng/carousel';
 import { ButtonModule } from 'primeng/button';
-import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 
 interface Pelicula {
   id: number;
@@ -15,19 +15,19 @@ interface Pelicula {
 @Component({
   selector: 'cartelera',
   imports: [
-    BrowserModule,
+    CommonModule,
     CarouselModule,
     ButtonModule
   ],
   templateUrl: './cartelera.html',
-  styleUrl: './cartelera.scss',
+  styleUrls: ['./cartelera.scss'],
 })
 export class Cartelera {
   peliculas: Pelicula[] = [
     {
       id: 1,
       titulo: 'Inside Out 2',
-      imagen: 'assets/inside-out-2.jpg',
+      imagen: 'https://static1.moviewebimages.com/wordpress/wp-content/uploads/2023/11/inside_out_two_xlg.jpg',
       categoria: 'ANIMACIÓN',
       etiqueta: 'ESTRENO',
       descripcion:
@@ -37,7 +37,7 @@ export class Cartelera {
     {
       id: 2,
       titulo: 'Dune: Parte Dos',
-      imagen: 'assets/dune-2.jpg',
+      imagen: 'https://th.bing.com/th/id/R.1b2964e594bd3cb7461777e06072b7df?rik=vHZSBUNf4uqSKQ&riu=http%3a%2f%2fwww.beautifulballad.org%2fwp-content%2fuploads%2f2024%2f01%2fdune-part-two-DUNE2_VERT_MAIN_2764x4096_DOM_REV_rgb.jpg&ehk=r6NC4IY8%2bwPicTcNnRjRaP1peBAB3zfTEEEbcnP4rr8%3d&risl=&pid=ImgRaw&r=0',
       categoria: 'CIENCIA FICCIÓN',
       etiqueta: 'DESTACADA',
       descripcion:
@@ -47,7 +47,7 @@ export class Cartelera {
     {
       id: 3,
       titulo: 'Oppenheimer',
-      imagen: 'assets/oppenheimer.jpg',
+      imagen: 'https://tse3.mm.bing.net/th/id/OIP.MZQeJtP5IGINFpMyhMiZ7wHaEK?rs=1&pid=ImgDetMain&o=7&rm=3',
       categoria: 'DRAMA',
       etiqueta: 'ÉXITO',
       descripcion:
@@ -57,7 +57,7 @@ export class Cartelera {
     {
       id: 4,
       titulo: 'Spider-Man: Across the Spider-Verse',
-      imagen: 'assets/spiderverse.jpg',
+      imagen: 'https://tse1.mm.bing.net/th/id/OIP.UPzP54t5s9v9JIA0SULCcAHaK_?rs=1&pid=ImgDetMain&o=7&rm=3',
       categoria: 'SUPERHÉROES',
       etiqueta: 'POPULAR',
       descripcion:
