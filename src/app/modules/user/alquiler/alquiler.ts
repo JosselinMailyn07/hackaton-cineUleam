@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { FooterComponent } from '@shared/footer/footer';
 import { HeaderComponent } from '@shared/header/header';
+import { Dialog, DialogModule } from 'primeng/dialog';
 type TipoEvento = 'película' | 'conferencia' | 'concierto' | 'teatro' | 'otro';
 
 interface AlquilerSala {
@@ -20,6 +21,7 @@ interface AlquilerSala {
   imports: [
     CardModule,
     ButtonModule,
+    DialogModule,
     CommonModule,
     HeaderComponent,
     FooterComponent
@@ -57,4 +59,12 @@ export class Alquiler {
       estado: 'disponible'
     }
   ];
+  visible: boolean = false;
+  salaSeleccionada: AlquilerSala | null = null;
+
+  alquilar(sala: AlquilerSala) {
+    this.salaSeleccionada = sala;
+    this.visible = true;
+    sala.estado = 'reservado';
+  }
 }
