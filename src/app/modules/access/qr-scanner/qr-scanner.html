@@ -1,1 +1,31 @@
 <p>qr-scanner works!</p>
+<div class="qr-container">
+    <h2>Verificación de Reservas</h2>
+    <zxing-scanner
+      *ngIf="!mensaje"
+      [formats]="formats"
+      (scanSuccess)="onScanSuccess($event)"
+    ></zxing-scanner>
+    <div *ngIf="loading" class="loading">⏳ Verificando...</div>
+  
+    <div 
+      *ngIf="mensaje && !loading" 
+      class="mensaje"
+      [class.valido]="result"
+      [class.invalido]="!result">
+      {{ mensaje }}
+    </div>
+  
+    <div *ngIf="result && !loading" class="resultado">
+      <h3>🎟 Datos de la reserva</h3>
+      <p><strong>Cliente:</strong> {{ result.nombre_usuario }}</p>
+      <p><strong>Película:</strong> {{ result.pelicula }}</p>
+      <p><strong>Sala:</strong> {{ result.sala }}</p>
+      <p><strong>Fecha y hora:</strong> {{ result.fecha_hora | date:'short' }}</p>
+      <p><strong>Asientos Escaneados:</strong> {{ result.asientos_escaneados }}</p>
+    </div>
+    
+    <button *ngIf="mensaje && !loading" (click)="resetScanner()" class="reset-button">
+      Escanear Otro QR
+    </button>
+  </div>
