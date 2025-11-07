@@ -1,1 +1,196 @@
-<p>movie-showtimes-management works!</p>
+<app-header></app-header>
+<div class="gestionFuncionesContainer">
+    <!-- Toast para notificaciones -->
+    <p-toast></p-toast>
+    
+    <!-- Diálogo de confirmación -->
+    <p-confirmDialog></p-confirmDialog>
+  
+    <!-- Header con título y acciones -->
+    <div class="headerAcciones">
+      <div class="headerInfo">
+        <h1 class="tituloPagina">Gestión de Funciones</h1>
+        <p class="descripcionPagina">Programa y administra las funciones de cine</p>
+      </div>
+      
+      <button 
+        pButton 
+        label="Nueva Función" 
+        icon="pi pi-plus" 
+        class="p-button-primary botonNuevaFuncion"
+        (click)="abrirDialogoNuevaFuncion()">
+      </button>
+    </div>
+  
+    <!-- Tabla de funciones -->
+    <div class="tablaContainer">
+      <p-table 
+        [value]="listaFunciones" 
+        [loading]="cargando"
+        [paginator]="true" 
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        styleClass="p-datatable-striped p-datatable-gridlines"
+        dataKey="id">
+        
+        <!-- Header de la tabla -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Película</th>
+            <th>Sala</th>
+            <th>Fecha y Hora</th>
+            <th>Asientos</th>
+            <th>Estado</th>
+            <th style="width: 150px">Acciones</th>
+          </tr>
+        </ng-template>
+  
+        <!-- Template de loading -->
+        <ng-template pTemplate="loadingbody">
+          <tr>
+            <td colspan="6" class="text-center">
+              <div class="cargandoContainer">
+                <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                <p>Cargando funciones...</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+  
+        <!-- Body de la tabla -->
+        <ng-template pTemplate="body" let-funcion>
+          <tr>
+            <!-- Columna Película -->
+            <td>
+              <div class="infoFuncion">
+                <div class="detallesFuncion">
+                  <h4 class="tituloPelicula">{{ funcion.peliculaTitulo }}</h4>
+                  <p class="fechaHora">{{ formatearFechaHora(funcion) }}</p>
+                </div>
+              </div>
+            </td>
+  
+            <!-- Columna Sala -->
+            <td>
+              <div class="salaTipo">
+                <span class="salaInfo">
+                  {{ funcion.sala }}
+                </span>
+                <p-tag 
+                  [value]="funcion.tipo" 
+                  severity="info"
+                  styleClass="tagTipo">
+                </p-tag>
+              </div>
+            </td>
+  
+            <!-- Columna Fecha y Hora -->
+            <td>
+              <div class="fechaHoraCompleta">
+                <span class="fecha">{{ formatearFecha(funcion.fecha) }}</span>
+                <span class="hora">{{ funcion.hora }}</span>
+              </div>
+            </td>
+  
+            <!-- Columna Asientos -->
+            <td>
+              <div class="infoAsientos">
+                <div class="barraOcupacion">
+                  <div class="barraFondo">
+                    <div 
+                      class="barraProgreso" 
+                      [style.width.%]="calcularOcupacion(funcion)"
+                      [class.barra-completa]="funcion.estado === 'completa'"
+                      [class.barra-disponible]="funcion.estado === 'activa'"
+                      [class.barra-cancelada]="funcion.estado === 'cancelada'">
+                    </div>
+                  </div>
+                  <span class="textoAsientos">
+                    {{ funcion.asientosDisponibles }}/{{ funcion.asientosTotales }}
+                  </span>
+                </div>
+              </div>
+            </td>
+  
+            <!-- Columna Estado -->
+            <td>
+              <p-tag 
+                [value]="funcion.estado | titlecase"
+                [severity]="obtenerSeveridadEstado(funcion.estado)">
+              </p-tag>
+            </td>
+  
+            <!-- Columna Acciones -->
+            <td>
+              <div class="accionesFuncion">
+                <!-- Botón Editar -->
+                <button 
+                  pButton 
+                  icon="pi pi-pencil" 
+                  class="p-button-rounded p-button-text p-button-sm botonEditar"
+                  pTooltip="Editar función"
+                  tooltipPosition="top"
+                  (click)="abrirDialogoEditarFuncion(funcion)">
+                </button>
+  
+                <!-- Botón Eliminar -->
+                <button 
+                  pButton 
+                  icon="pi pi-trash" 
+                  class="p-button-rounded p-button-text p-button-sm p-button-danger botonEliminar"
+                  pTooltip="Eliminar función"
+                  tooltipPosition="top"
+                  (click)="confirmarEliminacion(funcion)">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+  
+        <!-- Template cuando no hay datos -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="text-center vacioContainer">
+              <div class="vacioContent">
+                <i class="pi pi-calendar" style="font-size: 3rem; color: #ccc;"></i>
+                <h3>No hay funciones programadas</h3>
+                <p>Comienza programando tu primera función</p>
+                <button 
+                  pButton 
+                  label="Programar Primera Función" 
+                  icon="pi pi-plus" 
+                  class="p-button-primary"
+                  (click)="abrirDialogoNuevaFuncion()">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  
+    <!-- Diálogo simplificado temporalmente -->
+    <p-dialog 
+      [(visible)]="mostrarDialogoEdicion" 
+      [style]="{ width: '90vw', maxWidth: '500px' }"
+      [modal]="true" 
+      [closable]="true"
+      [header]="esEdicion ? 'Editar Función' : 'Nueva Función'">
+      
+      <div class="formularioSimple">
+        <p>Funcionalidad de formulario temporalmente deshabilitada.</p>
+        <p>Se requiere instalar módulos adicionales de PrimeNG.</p>
+      </div>
+  
+      <ng-template pTemplate="footer">
+        <button 
+          pButton 
+          label="Cerrar" 
+          icon="pi pi-times" 
+          class="p-button-text"
+          (click)="mostrarDialogoEdicion = false">
+        </button>
+      </ng-template>
+    </p-dialog>
+  </div>
+  <app-footer></app-footer>

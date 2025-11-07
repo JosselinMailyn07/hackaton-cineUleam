@@ -32,11 +32,8 @@
     "@supabase/supabase-js": "^2.80.0",
     "@tailwindcss/postcss": "^4.1.17",
     "@techiediaries/ngx-qrcode": "^9.1.0",
-<<<<<<< HEAD
     "chart.js": "^4.5.1",
     "postcss": "^8.5.6",
-=======
->>>>>>> 5c4525abdf012cedee468a4da20186d07358b68f
     "primeicons": "^7.0.0",
     "primeng": "^20.3.0",
     "primevue": "^4.4.1",
