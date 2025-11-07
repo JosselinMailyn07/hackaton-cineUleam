@@ -1,0 +1,435 @@
+<app-header-admin></app-header-admin>
+<div class="gestionAlquilerContainer">
+    <!-- Toast para notificaciones -->
+    <p-toast></p-toast>
+    
+    <!-- Diálogo de confirmación -->
+    <p-confirmDialog></p-confirmDialog>
+  
+    <!-- Header con título y acciones -->
+    <div class="headerAcciones">
+      <div class="headerInfo">
+        <h1 class="tituloPagina">Gestión de Alquiler</h1>
+        <p class="descripcionPagina">Configura horarios y días disponibles para alquiler del cine</p>
+      </div>
+      
+      <button 
+        pButton 
+        label="Nueva Configuración" 
+        icon="pi pi-plus" 
+        class="p-button-primary botonNuevaConfiguracion"
+        (click)="abrirDialogoNuevaConfiguracion()">
+      </button>
+    </div>
+  
+    <!-- Tabla de configuraciones -->
+    <div class="tablaContainer">
+      <p-table 
+        [value]="listaConfiguraciones" 
+        [loading]="cargando"
+        [paginator]="true" 
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        [globalFilterFields]="['nombre', 'descripcion']"
+        styleClass="p-datatable-striped p-datatable-gridlines"
+        dataKey="id">
+        
+        <!-- Header de la tabla -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 200px">Configuración</th>
+            <th>Días Disponibles</th>
+            <th>Horarios</th>
+            <th>Duración Sesión</th>
+            <th>Precio Base</th>
+            <th>Estado</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th style="width: 150px">Acciones</th>
+          </tr>
+        </ng-template>
+  
+        <!-- Template de loading -->
+        <ng-template pTemplate="loadingbody">
+          <tr>
+            <td colspan="9" class="text-center">
+              <div class="cargandoContainer">
+                <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                <p>Cargando configuraciones...</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+  
+        <!-- Body de la tabla -->
+        <ng-template pTemplate="body" let-configuracion>
+          <tr>
+            <!-- Columna Configuración -->
+            <td>
+              <div class="infoConfiguracion">
+                <div class="iconoConfiguracion">
+                  <i class="pi pi-calendar"></i>
+                </div>
+                <div class="detallesConfiguracion">
+                  <h4 class="nombreConfiguracion">{{ configuracion.nombre }}</h4>
+                  <p class="descripcionConfiguracion">{{ configuracion.descripcion }}</p>
+                </div>
+              </div>
+            </td>
+  
+            <!-- Columna Días Disponibles -->
+            <td>
+              <div class="diasLista">
+                <span *ngFor="let dia of configuracion.diasDisponibles" class="badgeDia">
+                  {{ formatearDia(dia) }}
+                </span>
+              </div>
+            </td>
+  
+            <!-- Columna Horarios -->
+            <td>
+              <div class="horariosLista">
+                <span *ngFor="let horario of configuracion.horarios" class="badgeHorario">
+                  {{ horario.horaInicio }} - {{ horario.horaFin }}
+                </span>
+              </div>
+            </td>
+  
+            <!-- Columna Duración Sesión -->
+            <td>
+              <span class="duracionSesion">
+                {{ configuracion.duracionSesion }} min
+              </span>
+            </td>
+  
+            <!-- Columna Precio Base -->
+            <td>
+              <span class="precioBase">
+                ${{ configuracion.precioBase }}
+              </span>
+            </td>
+  
+            <!-- Columna Estado -->
+            <td>
+              <p-tag 
+                [value]="configuracion.estado | titlecase"
+                [severity]="obtenerSeveridadEstado(configuracion.estado)">
+              </p-tag>
+            </td>
+  
+            <!-- Columna Fecha Inicio -->
+            <td>
+              <span class="fechaInicio">
+                {{ formatearFecha(configuracion.fechaInicio) }}
+              </span>
+            </td>
+  
+            <!-- Columna Fecha Fin -->
+            <td>
+              <span class="fechaFin">
+                {{ formatearFecha(configuracion.fechaFin) }}
+              </span>
+            </td>
+  
+            <!-- Columna Acciones -->
+            <td>
+              <div class="accionesConfiguracion">
+                <!-- Botón Editar -->
+                <button 
+                  pButton 
+                  icon="pi pi-pencil" 
+                  class="p-button-rounded p-button-text p-button-sm botonEditar"
+                  pTooltip="Editar configuración"
+                  tooltipPosition="top"
+                  (click)="abrirDialogoEditarConfiguracion(configuracion)">
+                </button>
+  
+                <!-- Botón Cambiar Estado -->
+                <button 
+                  pButton 
+                  [icon]="configuracion.estado === 'activa' ? 'pi pi-pause' : 'pi pi-play'" 
+                  class="p-button-rounded p-button-text p-button-sm"
+                  [ngClass]="{
+                    'botonDesactivar': configuracion.estado === 'activa',
+                    'botonActivar': configuracion.estado !== 'activa'
+                  }"
+                  [pTooltip]="configuracion.estado === 'activa' ? 'Desactivar' : 'Activar'"
+                  tooltipPosition="top"
+                  (click)="cambiarEstadoConfiguracion(configuracion)">
+                </button>
+  
+                <!-- Botón Eliminar -->
+                <button 
+                  pButton 
+                  icon="pi pi-trash" 
+                  class="p-button-rounded p-button-text p-button-sm p-button-danger botonEliminar"
+                  pTooltip="Eliminar configuración"
+                  tooltipPosition="top"
+                  (click)="confirmarEliminacion(configuracion)">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+  
+        <!-- Template cuando no hay datos -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="9" class="text-center vacioContainer">
+              <div class="vacioContent">
+                <i class="pi pi-calendar-times" style="font-size: 3rem; color: #ccc;"></i>
+                <h3>No hay configuraciones</h3>
+                <p>Comienza creando tu primera configuración de alquiler</p>
+                <button 
+                  pButton 
+                  label="Crear Primera Configuración" 
+                  icon="pi pi-plus" 
+                  class="p-button-primary"
+                  (click)="abrirDialogoNuevaConfiguracion()">
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  
+    <!-- Diálogo de Edición/Creación -->
+    <p-dialog 
+      [(visible)]="mostrarDialogoEdicion" 
+      [style]="{ width: '90vw', maxWidth: '800px' }"
+      [modal]="true" 
+      [closable]="true"
+      [draggable]="false"
+      [resizable]="false"
+      [header]="esEdicion ? 'Editar Configuración' : 'Nueva Configuración'">
+      
+      <form (ngSubmit)="guardarConfiguracion()" #formConfiguracion="ngForm">
+        <div class="formularioConfiguracion">
+          
+          <!-- Sección Información Básica -->
+          <div class="seccionFormulario">
+            <h3 class="tituloSeccion">Información Básica</h3>
+            
+            <div class="campoFormulario">
+              <label for="nombre">Nombre *</label>
+              <input 
+                id="nombre"
+                type="text" 
+                pInputText 
+                [(ngModel)]="configuracionSeleccionada.nombre" 
+                name="nombre"
+                placeholder="Ej: Configuración Semanal Estándar"
+                [class]="{'ng-invalid ng-dirty': submitted && !configuracionSeleccionada.nombre}" />
+              <small 
+                class="errorValidacion" 
+                *ngIf="submitted && !configuracionSeleccionada.nombre">
+                El nombre es requerido
+              </small>
+            </div>
+  
+            <div class="campoFormulario">
+              <label for="descripcion">Descripción</label>
+              <textarea 
+                id="descripcion"
+                pInputTextarea 
+                [(ngModel)]="configuracionSeleccionada.descripcion" 
+                name="descripcion"
+                [rows]="3"
+                placeholder="Describe esta configuración de horarios...">
+              </textarea>
+            </div>
+  
+            <div class="camposGrid">
+              <div class="campoFormulario">
+                <label for="duracionSesion">Duración Sesión (min) *</label>
+                <input 
+                  id="duracionSesion"
+                  type="number" 
+                  pInputText 
+                  [(ngModel)]="configuracionSeleccionada.duracionSesion" 
+                  name="duracionSesion"
+                  min="30"
+                  placeholder="120" />
+              </div>
+  
+              <div class="campoFormulario">
+                <label for="precioBase">Precio Base ($) *</label>
+                <input 
+                  id="precioBase"
+                  type="number" 
+                  pInputText 
+                  [(ngModel)]="configuracionSeleccionada.precioBase" 
+                  name="precioBase"
+                  min="0"
+                  step="10"
+                  placeholder="150.00" />
+              </div>
+            </div>
+          </div>
+  
+          <!-- Sección Días Disponibles -->
+          <div class="seccionFormulario">
+            <h3 class="tituloSeccion">Días Disponibles *</h3>
+            
+            <div class="campoFormulario">
+              <p-multiSelect 
+                [options]="opcionesDias" 
+                [(ngModel)]="configuracionSeleccionada.diasDisponibles" 
+                name="diasDisponibles"
+                placeholder="Selecciona días disponibles"
+                [class]="{'ng-invalid ng-dirty': submitted && configuracionSeleccionada.diasDisponibles.length === 0}">
+              </p-multiSelect>
+              <small 
+                class="errorValidacion" 
+                *ngIf="submitted && configuracionSeleccionada.diasDisponibles.length === 0">
+                Al menos un día es requerido
+              </small>
+            </div>
+          </div>
+  
+          <!-- Sección Horarios -->
+          <div class="seccionFormulario">
+            <h3 class="tituloSeccion">Horarios Disponibles *</h3>
+            
+            <div class="horariosContainer">
+              <div *ngFor="let horario of configuracionSeleccionada.horarios; let i = index" class="horarioItem">
+                <h4>Horario {{ i + 1 }}</h4>
+                
+                <div class="camposGrid">
+                  <div class="campoFormulario">
+                    <label>Hora Inicio *</label>
+                    <input 
+                      type="time"
+                      pInputText
+                      [(ngModel)]="horario.horaInicio"
+                      [name]="'horaInicio_' + i"
+                      [class]="{'ng-invalid ng-dirty': submitted && !horario.horaInicio}">
+                  </div>
+                  
+                  <div class="campoFormulario">
+                    <label>Hora Fin *</label>
+                    <input 
+                      type="time"
+                      pInputText
+                      [(ngModel)]="horario.horaFin"
+                      [name]="'horaFin_' + i"
+                      [class]="{'ng-invalid ng-dirty': submitted && !horario.horaFin}">
+                  </div>
+                  
+                  <div class="campoFormulario accionesHorario">
+                    <label>Horarios Predefinidos</label>
+                    <p-select 
+                      [options]="opcionesHorarios" 
+                      (onChange)="seleccionarHorarioPredefinido($event, i)"
+                      placeholder="Seleccionar predefinido">
+                    </p-select>
+                  </div>
+                  
+                  <div class="campoFormulario accionesHorario">
+                    <label>&nbsp;</label>
+                    <button 
+                      pButton 
+                      icon="pi pi-trash" 
+                      class="p-button-rounded p-button-text p-button-danger"
+                      (click)="eliminarHorario(i)"
+                      *ngIf="configuracionSeleccionada.horarios.length > 1"
+                      type="button">
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <button 
+                pButton 
+                label="Agregar Horario" 
+                icon="pi pi-plus" 
+                class="p-button-text"
+                type="button"
+                (click)="agregarHorario()">
+              </button>
+            </div>
+          </div>
+  
+          <!-- Sección Fechas y Estado -->
+          <div class="seccionFormulario">
+            <h3 class="tituloSeccion">Vigencia y Estado</h3>
+            
+            <div class="camposGrid">
+              <div class="campoFormulario">
+                <label for="fechaInicio">Fecha Inicio *</label>
+                <input 
+                  id="fechaInicio"
+                  type="date" 
+                  pInputText 
+                  [(ngModel)]="configuracionSeleccionada.fechaInicio" 
+                  name="fechaInicio"
+                  [class]="{'ng-invalid ng-dirty': submitted && !configuracionSeleccionada.fechaInicio}" />
+                <small 
+                  class="errorValidacion" 
+                  *ngIf="submitted && !configuracionSeleccionada.fechaInicio">
+                  La fecha de inicio es requerida
+                </small>
+              </div>
+  
+              <div class="campoFormulario">
+                <label for="fechaFin">Fecha Fin</label>
+                <input 
+                  id="fechaFin"
+                  type="date" 
+                  pInputText 
+                  [(ngModel)]="configuracionSeleccionada.fechaFin" 
+                  name="fechaFin" />
+              </div>
+            </div>
+  
+            <div class="campoFormulario">
+              <label for="estado">Estado</label>
+              <p-select 
+                id="estado"
+                [options]="opcionesEstados" 
+                [(ngModel)]="configuracionSeleccionada.estado" 
+                name="estado">
+              </p-select>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Footer del diálogo -->
+        <ng-template pTemplate="footer">
+          <div class="footerFormulario">
+            <button 
+              pButton 
+              label="Cancelar" 
+              icon="pi pi-times" 
+              class="p-button-text botonCancelar"
+              type="button"
+              (click)="cancelarFormulario()">
+            </button>
+            
+            <div class="accionesDerecha">
+              <button 
+                pButton 
+                label="Guardar Borrador" 
+                icon="pi pi-save" 
+                class="p-button-secondary botonBorrador"
+                type="button"
+                (click)="guardarBorrador()"
+                *ngIf="esEdicion">
+              </button>
+              
+              <button 
+                pButton 
+                [label]="esEdicion ? 'Actualizar' : 'Crear Configuración'" 
+                [icon]="esEdicion ? 'pi pi-check' : 'pi pi-plus'" 
+                class="p-button-primary botonGuardar"
+                type="submit">
+              </button>
+            </div>
+          </div>
+        </ng-template>
+      </form>
+    </p-dialog>
+  </div>
+  <app-footer></app-footer>

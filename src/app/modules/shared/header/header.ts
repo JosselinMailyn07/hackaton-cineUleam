@@ -37,6 +37,10 @@ export class HeaderComponent implements OnInit {
   mostrarSugerencias: boolean = false;
   preventClose: boolean = false;
   menuAbierto: boolean = false;
+  mostrarMenuMovil: boolean = false;
+  mostrarModalBusqueda: boolean = false;
+  terminoBusquedaMovil: string = '';
+  sugerenciasMovil: string[] = [];
 
   // Detección de viewport
   esMovil: boolean = false;
@@ -53,7 +57,6 @@ export class HeaderComponent implements OnInit {
     { texto: 'Estrenos', icono: 'pi pi-star', ruta: '/estrenos' },
     { texto: 'Próximamente', icono: 'pi pi-calendar', ruta: '/proximamente' },
     { texto: 'Alquiler', icono: 'pi pi-calendar', ruta: '/user/alquiler' },
-    // { texto: 'Promociones', icono: 'pi pi-tag', ruta: '/promociones' }
   ];
 
   sugerencias = [
@@ -85,7 +88,6 @@ export class HeaderComponent implements OnInit {
   ];
 
   notificacionesNoLeidas = 2;
- 
 
   itemsMenu: MenuItem[] = [];
   itemsMenuMovil: MenuItem[] = [];
@@ -100,27 +102,41 @@ export class HeaderComponent implements OnInit {
   onResize() {
     this.verificarViewport();
     
-    // Cerrar búsqueda si se cambia a móvil pequeña
-    if (this.esMovilPequena && this.buscadorExpandido) {
+    // Cerrar menú móvil si se cambia a desktop
+    if (!this.esMovil && this.mostrarMenuMovil) {
+      this.cerrarMenuMovil();
+    }
+    
+    // Cerrar modales si cambia el tamaño
+    if (this.esMovil && this.buscadorExpandido) {
       this.contraerBuscador();
+    }
+    
+    if (!this.esMovilPequena && this.mostrarModalBusqueda) {
+      this.cerrarModalBusqueda();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    if (this.mostrarMenuMovil) {
+      this.cerrarMenuMovil();
+    }
+    if (this.mostrarModalBusqueda) {
+      this.cerrarModalBusqueda();
+    }
+    if (this.mostrarPanelNotificaciones) {
+      this.cerrarNotificaciones();
     }
   }
 
   verificarViewport() {
     const width = window.innerWidth;
     
-    this.esMovilPequena = width < 480;  // Móviles pequeños
-    this.esMovil = width < 768;         // Todos los móviles
-    this.esTablet = width >= 768 && width < 1024; // Tablets
-    this.esDesktop = width >= 1024;     // Desktop
-
-    console.log('Viewport detectado:', {
-      movilPequena: this.esMovilPequena,
-      movil: this.esMovil,
-      tablet: this.esTablet,
-      desktop: this.esDesktop,
-      width: width
-    });
+    this.esMovilPequena = width < 480;
+    this.esMovil = width < 768;
+    this.esTablet = width >= 768 && width < 1024;
+    this.esDesktop = width >= 1024;
   }
 
   inicializarUsuario() {
@@ -147,12 +163,6 @@ export class HeaderComponent implements OnInit {
         routerLink: '/user/historial-reservas',
         command: () => this.cerrarMenuUsuario()
       },
-      // {
-      //   label: 'Historial',
-      //   icon: 'pi pi-history',
-      //   routerLink: '/historial',
-      //   command: () => this.cerrarMenuUsuario()
-      // },
       {
         label: 'Configuración',
         icon: 'pi pi-cog',
@@ -223,17 +233,56 @@ export class HeaderComponent implements OnInit {
     ];
   }
 
-  // Métodos para móvil pequeña
+  // Métodos para el menú móvil
+  alternarMenuMovil() {
+    this.mostrarMenuMovil = !this.mostrarMenuMovil;
+    
+    if (this.mostrarMenuMovil) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+  cerrarMenuMovil() {
+    this.mostrarMenuMovil = false;
+    document.body.style.overflow = '';
+  }
+
+  // Métodos para búsqueda móvil
+  activarBusquedaMovil() {
+    this.mostrarModalBusqueda = true;
+    this.terminoBusquedaMovil = '';
+    this.sugerenciasMovil = [];
+  }
+
+  cerrarModalBusqueda() {
+    this.mostrarModalBusqueda = false;
+    this.terminoBusquedaMovil = '';
+    this.sugerenciasMovil = [];
+  }
+
+  realizarBusquedaMovil() {
+    if (this.terminoBusquedaMovil.trim()) {
+      console.log('Buscando desde móvil:', this.terminoBusquedaMovil);
+      this.cerrarModalBusqueda();
+    }
+  }
+
+  seleccionarSugerenciaMovil(sugerencia: string) {
+    this.terminoBusquedaMovil = sugerencia;
+    this.realizarBusquedaMovil();
+  }
+
+  // Métodos existentes (mantener igual)
   expandirBuscador() {
     this.buscadorExpandido = true;
     this.mostrarSugerencias = true;
     
-    // En móvil pequeña, mostrar overlay completo
     if (this.esMovilPequena) {
       document.body.style.overflow = 'hidden';
     }
     
-    // Enfocar el input después de la animación
     setTimeout(() => {
       if (this.buscadorInput) {
         this.buscadorInput.nativeElement.focus();
@@ -246,14 +295,12 @@ export class HeaderComponent implements OnInit {
     this.mostrarSugerencias = false;
     this.terminoBusqueda = '';
     
-    // Restaurar scroll en móvil pequeña
     if (this.esMovilPequena) {
       document.body.style.overflow = '';
     }
   }
 
   onBuscarInput() {
-    // Filtrar sugerencias basado en el término de búsqueda
     if (this.terminoBusqueda.trim().length > 0) {
       this.filtrarSugerencias();
     } else {
@@ -262,7 +309,6 @@ export class HeaderComponent implements OnInit {
   }
 
   onBuscarBlur() {
-    // En móvil pequeña, no cerrar inmediatamente para permitir selección
     const delay = this.esMovilPequena ? 500 : 200;
     
     setTimeout(() => {
@@ -300,7 +346,7 @@ export class HeaderComponent implements OnInit {
     
     this.sugerencias = todasSugerencias.filter(sugerencia =>
       sugerencia.toLowerCase().includes(term)
-    ).slice(0, this.esMovilPequena ? 3 : 5); // Menos sugerencias en móvil pequeña
+    ).slice(0, this.esMovilPequena ? 3 : 5);
   }
 
   seleccionarSugerencia(sugerencia: string) {
@@ -311,10 +357,8 @@ export class HeaderComponent implements OnInit {
   realizarBusqueda() {
     if (this.terminoBusqueda.trim()) {
       console.log('Buscando:', this.terminoBusqueda);
-      // Aquí iría la navegación a resultados de búsqueda
       this.contraerBuscador();
       
-      // En móvil pequeña, mostrar feedback táctil
       if (this.esMovilPequena) {
         this.mostrarFeedbackBusqueda();
       }
@@ -322,7 +366,6 @@ export class HeaderComponent implements OnInit {
   }
 
   mostrarFeedbackBusqueda() {
-    // Feedback visual para móviles pequeños
     const button = document.querySelector('.botonBuscarCompacto');
     if (button) {
       button.classList.add('busquedaRealizada');
@@ -332,11 +375,9 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  // Métodos del menú usuario
   onMenuToggle(event: any) {
     this.menuAbierto = !this.menuAbierto;
     
-    // En móvil pequeña, ajustar posición del menú
     if (this.esMovilPequena) {
       setTimeout(() => this.ajustarMenuMovil(), 0);
     }
@@ -348,7 +389,6 @@ export class HeaderComponent implements OnInit {
       const rect = menuOverlay.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       
-      // Asegurar que el menú no se salga de la pantalla
       if (rect.bottom > viewportHeight) {
         const menuElement = menuOverlay as HTMLElement;
         menuElement.style.top = 'auto';
@@ -361,13 +401,12 @@ export class HeaderComponent implements OnInit {
     this.menuAbierto = false;
   }
 
-  cerrarMenuMovil() {
-    // Cerrar menú móvil
-    this.menuAbierto = false;
-  }
-
   alternarMenu() {
-    this.menuAlternado.emit();
+    if (this.esMovil) {
+      this.alternarMenuMovil();
+    } else {
+      this.menuAlternado.emit();
+    }
   }
 
   alternarNotificaciones() {
@@ -375,7 +414,6 @@ export class HeaderComponent implements OnInit {
     if (this.mostrarPanelNotificaciones) {
       this.notificacionesNoLeidas = 0;
       
-      // En móvil pequeña, ajustar panel de notificaciones
       if (this.esMovilPequena) {
         setTimeout(() => this.ajustarPanelNotificaciones(), 0);
       }
@@ -386,7 +424,7 @@ export class HeaderComponent implements OnInit {
     const panel = document.querySelector('.panelNotificacionesMovil');
     if (panel) {
       const panelElement = panel as HTMLElement;
-      panelElement.style.height = 'calc(100vh - 60px)'; // Ajustar altura
+      panelElement.style.height = 'calc(100vh - 60px)';
     }
   }
 
@@ -407,14 +445,12 @@ export class HeaderComponent implements OnInit {
     console.log('Cerrando sesión...');
     this.usuarioLogueado = null;
     
-    // Feedback visual para móvil pequeña
     if (this.esMovilPequena) {
       this.mostrarFeedbackCerrarSesion();
     }
   }
 
   mostrarFeedbackCerrarSesion() {
-    // Podrías mostrar un toast o mensaje de confirmación
     console.log('Sesión cerrada - Redirigiendo...');
   }
 
@@ -422,7 +458,6 @@ export class HeaderComponent implements OnInit {
     return sugerencia;
   }
 
-  // Método para obtener el tipo de dispositivo (útil para debugging)
   getTipoDispositivo(): string {
     if (this.esMovilPequena) return 'Móvil Pequeño';
     if (this.esMovil) return 'Móvil';
