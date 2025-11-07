@@ -1,78 +1,63 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-// PrimeNG Modules
+import { RouterModule } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { TagModule } from 'primeng/tag';
-import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
-import { BadgeModule } from 'primeng/badge';
-import { AvatarModule } from 'primeng/avatar';
-// import { CalendarModule } from 'primeng/calendar';
-
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { HeaderAdminComponent } from '../header-admin/header-admin';
+import { FooterComponent } from '@shared/footer/footer';
 
 // Interfaces para tipos de datos
-interface Reserva {
-  id?: string;
-  codigoQr: string;
-  usuarioId: string;
-  usuarioNombre: string;
-  usuarioEmail: string;
-  peliculaId: string;
-  peliculaTitulo: string;
-  funcionId: string;
-  fechaFuncion: Date;
-  horaFuncion: string;
-  sala: string;
-  asientos: string[];
-  cantidadAsientos: number;
-  precioTotal: number;
-  estado: 'pendiente' | 'confirmada' | 'cancelada' | 'utilizada';
-  fechaReserva: Date;
-  fechaConfirmacion?: Date;
-  fechaCancelacion?: Date;
-  metodoPago: 'transferencia' | 'efectivo' | 'tarjeta';
-  comprobantePago?: string;
-  asistenciaRegistrada: boolean;
-  fechaAsistencia?: Date;
+interface Horario {
+  horaInicio: string; // Cambiado a string para simplificar
+  horaFin: string;
 }
 
-interface EstadisticaReservas {
-  total: number;
-  pendientes: number;
-  confirmadas: number;
-  canceladas: number;
-  utilizadas: number;
-  ingresosTotales: number;
-  promedioAsistencia: number;
+interface ConfiguracionAlquiler {
+  id?: string;
+  nombre: string;
+  descripcion: string;
+  diasDisponibles: string[];
+  horarios: Horario[];
+  duracionSesion: number;
+  precioBase: number;
+  fechaInicio: string; // Cambiado a string para simplificar
+  fechaFin: string;
+  estado: 'activa' | 'inactiva' | 'programada';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 @Component({
-  selector: 'app-reservas-management',
+  selector: 'app-rental-management',
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
     FormsModule,
-    // PrimeNG Modules
+    RouterModule,
     TableModule,
     ButtonModule,
     DialogModule,
     ConfirmDialogModule,
     InputTextModule,
+    TextareaModule,
+    SelectModule,
+    MultiSelectModule,
     TagModule,
-    ToastModule,
     TooltipModule,
-    BadgeModule,
-    AvatarModule,
-    // CalendarModule
+    ToastModule,
+    HeaderAdminComponent,
+    FooterComponent
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './reservas-management.html',
@@ -80,35 +65,44 @@ interface EstadisticaReservas {
 })
 export class ReservasManagementComponent implements OnInit {
   
-  // Lista de reservas
-  listareservas: Reserva[] = [];
+  // Lista de configuraciones
+  listaConfiguraciones: ConfiguracionAlquiler[] = [];
   
-  // Reserva seleccionada para detalles
-  reservaSeleccionada: Reserva | null = null;
+  // Configuración seleccionada para edición
+  configuracionSeleccionada: ConfiguracionAlquiler = this.crearConfiguracionVacia();
   
   // Estados del componente
-  mostrarDialogoDetalles: boolean = false;
-  mostrarDialogoFiltros: boolean = false;
+  mostrarDialogoEdicion: boolean = false;
+  esEdicion: boolean = false;
   cargando: boolean = true;
-  
-  // Filtros
-  filtroEstado: string = '';
-  filtroFechaInicio: Date | null = null;
-  filtroFechaFin: Date | null = null;
-  terminoBusqueda: string = '';
+  submitted: boolean = false;
 
-  // Opciones para filtros
-  opcionesEstados: any[] = [
-    { label: 'Pendientes', value: 'pendiente' },
-    { label: 'Confirmadas', value: 'confirmada' },
-    { label: 'Canceladas', value: 'cancelada' },
-    { label: 'Utilizadas', value: 'utilizada' }
+  // Opciones para dropdowns
+  opcionesDias: any[] = [
+    { label: 'Lunes', value: 'lunes' },
+    { label: 'Martes', value: 'martes' },
+    { label: 'Miércoles', value: 'miercoles' },
+    { label: 'Jueves', value: 'jueves' },
+    { label: 'Viernes', value: 'viernes' },
+    { label: 'Sábado', value: 'sabado' },
+    { label: 'Domingo', value: 'domingo' }
   ];
 
-  opcionesMetodosPago: any[] = [
-    { label: 'Transferencia', value: 'transferencia' },
-    { label: 'Efectivo', value: 'efectivo' },
-    { label: 'Tarjeta', value: 'tarjeta' }
+  opcionesEstados: any[] = [
+    { label: 'Activa', value: 'activa' },
+    { label: 'Inactiva', value: 'inactiva' },
+    { label: 'Programada', value: 'programada' }
+  ];
+
+  // Opciones predefinidas para horarios
+  opcionesHorarios: any[] = [
+    { label: '09:00 - 12:00', value: { horaInicio: '09:00', horaFin: '12:00' } },
+    { label: '14:00 - 17:00', value: { horaInicio: '14:00', horaFin: '17:00' } },
+    { label: '19:00 - 22:00', value: { horaInicio: '19:00', horaFin: '22:00' } },
+    { label: '10:00 - 13:00', value: { horaInicio: '10:00', horaFin: '13:00' } },
+    { label: '15:00 - 18:00', value: { horaInicio: '15:00', horaFin: '18:00' } },
+    { label: '20:00 - 23:00', value: { horaInicio: '20:00', horaFin: '23:00' } },
+    { label: '22:00 - 02:00', value: { horaInicio: '22:00', horaFin: '02:00' } }
   ];
 
   constructor(
@@ -117,123 +111,63 @@ export class ReservasManagementComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.cargarReservas();
+    this.cargarConfiguraciones();
   }
 
   /**
-   * Carga la lista de reservas desde el servicio
+   * Carga la lista de configuraciones
    */
-  cargarReservas() {
+  cargarConfiguraciones() {
     this.cargando = true;
     
-    // Simulación de datos - en producción vendrían de un servicio
+    // Simulación de datos
     setTimeout(() => {
-      this.listareservas = [
+      this.listaConfiguraciones = [
         {
           id: '1',
-          codigoQr: 'RES-001-2024',
-          usuarioId: '1',
-          usuarioNombre: 'María González',
-          usuarioEmail: 'maria.gonzalez@uleam.edu.ec',
-          peliculaId: '1',
-          peliculaTitulo: 'Avatar: The Way of Water',
-          funcionId: '1',
-          fechaFuncion: new Date('2024-01-20'),
-          horaFuncion: '20:00',
-          sala: 'Sala 3 - IMAX',
-          asientos: ['A5', 'A6', 'A7'],
-          cantidadAsientos: 3,
-          precioTotal: 37.50,
-          estado: 'confirmada',
-          fechaReserva: new Date('2024-01-15'),
-          fechaConfirmacion: new Date('2024-01-15'),
-          metodoPago: 'transferencia',
-          comprobantePago: 'comp-001.jpg',
-          asistenciaRegistrada: false
+          nombre: 'Configuración Semanal Estándar',
+          descripcion: 'Horarios estándar para toda la semana',
+          diasDisponibles: ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'],
+          horarios: [
+            { horaInicio: '09:00', horaFin: '12:00' },
+            { horaInicio: '14:00', horaFin: '17:00' },
+            { horaInicio: '19:00', horaFin: '22:00' }
+          ],
+          duracionSesion: 180,
+          precioBase: 200,
+          fechaInicio: '2024-01-01',
+          fechaFin: '2024-12-31',
+          estado: 'activa'
         },
         {
           id: '2',
-          codigoQr: 'RES-002-2024',
-          usuarioId: '2',
-          usuarioNombre: 'Carlos López',
-          usuarioEmail: 'carlos.lopez@uleam.edu.ec',
-          peliculaId: '2',
-          peliculaTitulo: 'The Batman',
-          funcionId: '2',
-          fechaFuncion: new Date('2024-01-18'),
-          horaFuncion: '17:30',
-          sala: 'Sala 1 - Premium',
-          asientos: ['B12'],
-          cantidadAsientos: 1,
-          precioTotal: 8.50,
-          estado: 'pendiente',
-          fechaReserva: new Date('2024-01-16'),
-          metodoPago: 'efectivo',
-          asistenciaRegistrada: false
+          nombre: 'Fines de Semana Premium',
+          descripcion: 'Horarios especiales para fines de semana',
+          diasDisponibles: ['sabado', 'domingo'],
+          horarios: [
+            { horaInicio: '10:00', horaFin: '13:00' },
+            { horaInicio: '15:00', horaFin: '18:00' },
+            { horaInicio: '20:00', horaFin: '23:00' }
+          ],
+          duracionSesion: 180,
+          precioBase: 250,
+          fechaInicio: '2024-01-01',
+          fechaFin: '2024-12-31',
+          estado: 'activa'
         },
         {
           id: '3',
-          codigoQr: 'RES-003-2024',
-          usuarioId: '3',
-          usuarioNombre: 'Ana Martínez',
-          usuarioEmail: 'ana.martinez@uleam.edu.ec',
-          peliculaId: '1',
-          peliculaTitulo: 'Avatar: The Way of Water',
-          funcionId: '3',
-          fechaFuncion: new Date('2024-01-19'),
-          horaFuncion: '15:00',
-          sala: 'Sala 4 - 4DX',
-          asientos: ['C3', 'C4'],
-          cantidadAsientos: 2,
-          precioTotal: 30.00,
-          estado: 'utilizada',
-          fechaReserva: new Date('2024-01-14'),
-          fechaConfirmacion: new Date('2024-01-14'),
-          metodoPago: 'tarjeta',
-          asistenciaRegistrada: true,
-          fechaAsistencia: new Date('2024-01-19')
-        },
-        {
-          id: '4',
-          codigoQr: 'RES-004-2024',
-          usuarioId: '4',
-          usuarioNombre: 'Luis Torres',
-          usuarioEmail: 'luis.torres@uleam.edu.ec',
-          peliculaId: '5',
-          peliculaTitulo: 'Black Panther: Wakanda Forever',
-          funcionId: '4',
-          fechaFuncion: new Date('2024-01-17'),
-          horaFuncion: '12:30',
-          sala: 'Sala 2 - Standard',
-          asientos: ['D8', 'D9'],
-          cantidadAsientos: 2,
-          precioTotal: 15.00,
-          estado: 'cancelada',
-          fechaReserva: new Date('2024-01-13'),
-          fechaCancelacion: new Date('2024-01-14'),
-          metodoPago: 'transferencia',
-          asistenciaRegistrada: false
-        },
-        {
-          id: '5',
-          codigoQr: 'RES-005-2024',
-          usuarioId: '5',
-          usuarioNombre: 'Elena Castro',
-          usuarioEmail: 'elena.castro@uleam.edu.ec',
-          peliculaId: '3',
-          peliculaTitulo: 'Spider-Man: No Way Home',
-          funcionId: '5',
-          fechaFuncion: new Date('2024-01-21'),
-          horaFuncion: '19:00',
-          sala: 'Sala 1 - Premium',
-          asientos: ['A1', 'A2', 'A3', 'A4'],
-          cantidadAsientos: 4,
-          precioTotal: 34.00,
-          estado: 'confirmada',
-          fechaReserva: new Date('2024-01-16'),
-          fechaConfirmacion: new Date('2024-01-16'),
-          metodoPago: 'tarjeta',
-          asistenciaRegistrada: false
+          nombre: 'Horario Nocturno',
+          descripcion: 'Horarios nocturnos especiales',
+          diasDisponibles: ['viernes', 'sabado'],
+          horarios: [
+            { horaInicio: '22:00', horaFin: '02:00' }
+          ],
+          duracionSesion: 240,
+          precioBase: 300,
+          fechaInicio: '2024-02-01',
+          fechaFin: '2024-06-30',
+          estado: 'programada'
         }
       ];
       this.cargando = false;
@@ -241,265 +175,274 @@ export class ReservasManagementComponent implements OnInit {
   }
 
   /**
-   * Abre el diálogo para ver detalles de una reserva
+   * Abre el diálogo para crear una nueva configuración
    */
-  abrirDialogoDetalles(reserva: Reserva) {
-    this.reservaSeleccionada = { ...reserva };
-    this.mostrarDialogoDetalles = true;
+  abrirDialogoNuevaConfiguracion() {
+    this.configuracionSeleccionada = this.crearConfiguracionVacia();
+    this.esEdicion = false;
+    this.mostrarDialogoEdicion = true;
+    this.submitted = false;
   }
 
   /**
-   * Confirma una reserva pendiente
+   * Abre el diálogo para editar una configuración existente
    */
-  confirmarReserva(reserva: Reserva) {
-    this.confirmationService.confirm({
-      message: `¿Confirmar la reserva de ${reserva.usuarioNombre} para ${reserva.peliculaTitulo}?`,
-      header: 'Confirmar Reserva',
-      icon: 'pi pi-check-circle',
-      acceptLabel: 'Sí, confirmar',
-      rejectLabel: 'Cancelar',
-      accept: () => {
-        reserva.estado = 'confirmada';
-        reserva.fechaConfirmacion = new Date();
-        
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Reserva Confirmada',
-          detail: 'La reserva ha sido confirmada exitosamente'
-        });
+  abrirDialogoEditarConfiguracion(configuracion: ConfiguracionAlquiler) {
+    this.configuracionSeleccionada = { ...configuracion };
+    this.esEdicion = true;
+    this.mostrarDialogoEdicion = true;
+    this.submitted = false;
+  }
+
+  /**
+   * Guarda la configuración (crear o actualizar)
+   */
+  guardarConfiguracion() {
+    this.submitted = true;
+
+    if (!this.validarConfiguracion()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error de validación',
+        detail: 'Por favor complete todos los campos requeridos correctamente'
+      });
+      return;
+    }
+
+    // Simular guardado
+    if (this.esEdicion) {
+      const index = this.listaConfiguraciones.findIndex(c => c.id === this.configuracionSeleccionada.id);
+      if (index !== -1) {
+        this.listaConfiguraciones[index] = { ...this.configuracionSeleccionada };
       }
-    });
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Configuración actualizada correctamente'
+      });
+    } else {
+      const nuevaConfiguracion = {
+        ...this.configuracionSeleccionada,
+        id: (this.listaConfiguraciones.length + 1).toString(),
+        createdAt: new Date().toISOString()
+      };
+      this.listaConfiguraciones.push(nuevaConfiguracion);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Configuración creada correctamente'
+      });
+    }
+
+    this.mostrarDialogoEdicion = false;
+    this.configuracionSeleccionada = this.crearConfiguracionVacia();
   }
 
   /**
-   * Cancela una reserva
+   * Valida los datos de la configuración
    */
-  cancelarReserva(reserva: Reserva) {
+  validarConfiguracion(): boolean {
+    return !!this.configuracionSeleccionada.nombre &&
+           this.configuracionSeleccionada.diasDisponibles.length > 0 &&
+           this.configuracionSeleccionada.horarios.length > 0 &&
+           this.configuracionSeleccionada.horarios.every(h => h.horaInicio && h.horaFin) &&
+           !!this.configuracionSeleccionada.fechaInicio &&
+           this.configuracionSeleccionada.duracionSesion > 0 &&
+           this.configuracionSeleccionada.precioBase >= 0;
+  }
+
+  /**
+   * Confirma la eliminación de una configuración
+   */
+  confirmarEliminacion(configuracion: ConfiguracionAlquiler) {
     this.confirmationService.confirm({
-      message: `¿Cancelar la reserva de ${reserva.usuarioNombre} para ${reserva.peliculaTitulo}?`,
-      header: 'Cancelar Reserva',
+      message: `¿Estás seguro de eliminar "${configuracion.nombre}"?`,
+      header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, cancelar',
-      rejectLabel: 'No',
-      accept: () => {
-        reserva.estado = 'cancelada';
-        reserva.fechaCancelacion = new Date();
-        
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Reserva Cancelada',
-          detail: 'La reserva ha sido cancelada'
-        });
-      }
+      acceptLabel: 'Sí, eliminar',
+      rejectLabel: 'Cancelar',
+      accept: () => this.eliminarConfiguracion(configuracion.id!)
     });
   }
 
   /**
-   * Marca una reserva como utilizada (check-in)
+   * Elimina una configuración
    */
-  marcarComoUtilizada(reserva: Reserva) {
-    reserva.estado = 'utilizada';
-    reserva.asistenciaRegistrada = true;
-    reserva.fechaAsistencia = new Date();
+  eliminarConfiguracion(id: string) {
+    this.listaConfiguraciones = this.listaConfiguraciones.filter(c => c.id !== id);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Configuración eliminada correctamente'
+    });
+  }
+
+  /**
+   * Cambia el estado de una configuración
+   */
+  cambiarEstadoConfiguracion(configuracion: ConfiguracionAlquiler) {
+    const nuevoEstado = configuracion.estado === 'activa' ? 'inactiva' : 'activa';
+    configuracion.estado = nuevoEstado;
     
     this.messageService.add({
       severity: 'success',
-      summary: 'Asistencia Registrada',
-      detail: 'La reserva ha sido marcada como utilizada'
+      summary: 'Éxito',
+      detail: `Configuración ${nuevoEstado === 'activa' ? 'activada' : 'desactivada'}`
     });
   }
 
   /**
-   * Reembolsa una reserva cancelada
+   * Agrega un nuevo horario
    */
-  procesarReembolso(reserva: Reserva) {
-    this.confirmationService.confirm({
-      message: `¿Procesar reembolso de $${reserva.precioTotal} para ${reserva.usuarioNombre}?`,
-      header: 'Procesar Reembolso',
-      icon: 'pi pi-dollar',
-      acceptLabel: 'Sí, procesar',
-      rejectLabel: 'Cancelar',
-      accept: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Reembolso Procesado',
-          detail: `Reembolso de $${reserva.precioTotal} procesado exitosamente`
-        });
-      }
+  agregarHorario() {
+    this.configuracionSeleccionada.horarios.push({
+      horaInicio: '09:00',
+      horaFin: '12:00'
     });
+  }
+
+  /**
+   * Elimina un horario
+   */
+  eliminarHorario(index: number) {
+    if (this.configuracionSeleccionada.horarios.length > 1) {
+      this.configuracionSeleccionada.horarios.splice(index, 1);
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'Debe haber al menos un horario configurado'
+      });
+    }
+  }
+
+  /**
+   * Crea una configuración vacía para formularios nuevos
+   */
+  crearConfiguracionVacia(): ConfiguracionAlquiler {
+    const today = new Date();
+    const nextYear = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+    
+    return {
+      nombre: '',
+      descripcion: '',
+      diasDisponibles: [],
+      horarios: [{
+        horaInicio: '09:00',
+        horaFin: '12:00'
+      }],
+      duracionSesion: 180,
+      precioBase: 200,
+      fechaInicio: today.toISOString().split('T')[0],
+      fechaFin: nextYear.toISOString().split('T')[0],
+      estado: 'activa'
+    };
   }
 
   /**
    * Obtiene la severidad para el tag de estado
    */
-  obtenerSeveridadEstado(estado: string): any {
+  obtenerSeveridadEstado(estado: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' {
     switch (estado) {
-      case 'confirmada':
+      case 'activa':
         return 'success';
-      case 'pendiente':
-        return 'warning';
-      case 'cancelada':
+      case 'inactiva':
         return 'danger';
-      case 'utilizada':
-        return 'info';
+      case 'programada':
+        return 'warn';
       default:
-        return 'secondary';
+        return 'info';
     }
   }
 
   /**
-   * Obtiene la severidad para el tag de método de pago
+   * Formatea los días para mostrar
    */
-  obtenerSeveridadMetodoPago(metodo: string): any {
-    switch (metodo) {
-      case 'transferencia':
-        return 'info';
-      case 'efectivo':
-        return 'success';
-      case 'tarjeta':
-        return 'warning';
-      default:
-        return 'secondary';
-    }
-  }
-
-  /**
-   * Obtiene el icono para el método de pago
-   */
-  obtenerIconoMetodoPago(metodo: string): string {
-    switch (metodo) {
-      case 'transferencia':
-        return 'pi pi-building-columns';
-      case 'efectivo':
-        return 'pi pi-money-bill';
-      case 'tarjeta':
-        return 'pi pi-credit-card';
-      default:
-        return 'pi pi-question-circle';
-    }
+  formatearDia(dia: string): string {
+    const opcion = this.opcionesDias.find(d => d.value === dia);
+    return opcion ? opcion.label : dia;
   }
 
   /**
    * Formatea la fecha para mostrar
    */
-  formatearFecha(fecha: Date): string {
+  formatearFecha(fecha: string): string {
+    if (!fecha) return 'No definida';
     return new Date(fecha).toLocaleDateString('es-ES');
   }
 
   /**
-   * Formatea la fecha y hora completa
+   * Cancela el formulario y cierra el diálogo
    */
-  formatearFechaHora(fecha: Date): string {
-    return new Date(fecha).toLocaleString('es-ES');
-  }
-
-  /**
-   * Formatea los asientos para mostrar
-   */
-  formatearAsientos(asientos: string[]): string {
-    return asientos.join(', ');
-  }
-
-  /**
-   * Obtiene las iniciales del nombre para el avatar
-   */
-  obtenerIniciales(nombre: string): string {
-    const partes = nombre.split(' ');
-    let iniciales = '';
-    
-    if (partes.length > 0) {
-      iniciales += partes[0].charAt(0);
-    }
-    if (partes.length > 1) {
-      iniciales += partes[1].charAt(0);
-    }
-    
-    return iniciales.toUpperCase();
-  }
-
-  /**
-   * Filtra las reservas según los criterios
-   */
-  get reservasFiltradas(): Reserva[] {
-    return this.listareservas.filter(reserva => {
-      const coincideBusqueda = !this.terminoBusqueda || 
-        reserva.usuarioNombre.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) ||
-        reserva.peliculaTitulo.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) ||
-        reserva.codigoQr.toLowerCase().includes(this.terminoBusqueda.toLowerCase());
-      
-      const coincideEstado = !this.filtroEstado || reserva.estado === this.filtroEstado;
-      
-      let coincideFecha = true;
-      if (this.filtroFechaInicio && this.filtroFechaFin) {
-        const fechaReserva = new Date(reserva.fechaFuncion);
-        coincideFecha = fechaReserva >= this.filtroFechaInicio && fechaReserva <= this.filtroFechaFin;
-      }
-      
-      return coincideBusqueda && coincideEstado && coincideFecha;
-    });
-  }
-
-  /**
-   * Obtiene estadísticas de reservas
-   */
-  get estadisticasReservas(): EstadisticaReservas {
-    const total = this.listareservas.length;
-    const pendientes = this.listareservas.filter(r => r.estado === 'pendiente').length;
-    const confirmadas = this.listareservas.filter(r => r.estado === 'confirmada').length;
-    const canceladas = this.listareservas.filter(r => r.estado === 'cancelada').length;
-    const utilizadas = this.listareservas.filter(r => r.estado === 'utilizada').length;
-    
-    const ingresosTotales = this.listareservas
-      .filter(r => r.estado === 'confirmada' || r.estado === 'utilizada')
-      .reduce((sum, reserva) => sum + reserva.precioTotal, 0);
-    
-    const promedioAsistencia = total > 0 ? (utilizadas / total * 100) : 0;
-    
-    return {
-      total,
-      pendientes,
-      confirmadas,
-      canceladas,
-      utilizadas,
-      ingresosTotales,
-      promedioAsistencia
-    };
-  }
-
-  /**
-   * Exporta las reservas a CSV
-   */
-  exportarReservas() {
-    // Simulación de exportación
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Exportación Exitosa',
-      detail: 'Las reservas han sido exportadas a CSV'
-    });
-  }
-
-  /**
-   * Limpia todos los filtros
-   */
-  limpiarFiltros() {
-    this.filtroEstado = '';
-    this.filtroFechaInicio = null;
-    this.filtroFechaFin = null;
-    this.terminoBusqueda = '';
+  cancelarFormulario() {
+    this.mostrarDialogoEdicion = false;
+    this.submitted = false;
+    this.configuracionSeleccionada = this.crearConfiguracionVacia();
     
     this.messageService.add({
       severity: 'info',
-      summary: 'Filtros Limpiados',
-      detail: 'Todos los filtros han sido restablecidos'
+      summary: 'Cancelado',
+      detail: 'Los cambios no fueron guardados',
+      life: 3000
     });
   }
 
   /**
-   * Cancela y cierra el diálogo
+   * Guarda la configuración como borrador
    */
-  cancelarDialogo() {
-    this.mostrarDialogoDetalles = false;
-    this.mostrarDialogoFiltros = false;
-    this.reservaSeleccionada = null;
+  guardarBorrador() {
+    if (!this.validarConfiguracion()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validación',
+        detail: 'Complete los campos requeridos para guardar como borrador',
+        life: 5000
+      });
+      return;
+    }
+
+    const configuracionBorrador: ConfiguracionAlquiler = {
+      ...this.configuracionSeleccionada,
+      estado: 'inactiva'
+    };
+
+    if (this.esEdicion) {
+      const index = this.listaConfiguraciones.findIndex(c => c.id === configuracionBorrador.id);
+      if (index !== -1) {
+        this.listaConfiguraciones[index] = configuracionBorrador;
+      }
+    } else {
+      const nuevaConfiguracion = {
+        ...configuracionBorrador,
+        id: (this.listaConfiguraciones.length + 1).toString(),
+        createdAt: new Date().toISOString()
+      };
+      this.listaConfiguraciones.push(nuevaConfiguracion);
+    }
+
+    this.mostrarDialogoEdicion = false;
+    this.configuracionSeleccionada = this.crearConfiguracionVacia();
+    
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Borrador Guardado',
+      detail: 'La configuración fue guardada como borrador',
+      life: 5000
+    });
+  }
+
+  /**
+   * Maneja el cierre del diálogo
+   */
+  onHideDialog() {
+    this.submitted = false;
+    this.configuracionSeleccionada = this.crearConfiguracionVacia();
+  }
+
+  /**
+   * Selecciona un horario predefinido
+   */
+  seleccionarHorarioPredefinido(horario: any, index: number) {
+    this.configuracionSeleccionada.horarios[index] = { ...horario.value };
   }
 }

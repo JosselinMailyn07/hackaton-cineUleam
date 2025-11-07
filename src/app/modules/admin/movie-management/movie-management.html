@@ -332,16 +332,7 @@
               </small>
             </div>
   
-            <div class="campoFormulario">
-              <label for="actores">Actores (separados por coma)</label>
-              <input 
-                id="actores"
-                type="text" 
-                pInputText 
-                [(ngModel)]="peliculaSeleccionada.actores" 
-                name="actores"
-                placeholder="Actor 1, Actor 2, Actor 3..." />
-            </div>
+         
   
             <div class="camposGrid">
               <div class="campoFormulario">
@@ -391,17 +382,7 @@
                 <small class="ayudaCampo">Tamaño máximo: 1MB</small>
               </div>
   
-              <div class="campoFormulario">
-                <label>Imagen de Banner</label>
-                <p-fileUpload 
-                  mode="basic" 
-                  chooseLabel="Seleccionar"
-                  accept="image/*"
-                  (onSelect)="onUploadImagen($event, 'banner')"
-                  [maxFileSize]="2000000">
-                </p-fileUpload>
-                <small class="ayudaCampo">Tamaño máximo: 2MB</small>
-              </div>
+              
             </div>
   
             <div class="campoFormulario">
@@ -418,42 +399,24 @@
         </div>
   
         <!-- Footer del diálogo -->
-      <!-- Reemplaza la sección del footer del diálogo en movie-management.html -->
-
-<!-- Footer del diálogo con botones Guardar y Cancelar -->
-<ng-template pTemplate="footer">
-    <div class="footerFormulario">
-      <button 
-        pButton 
-        label="Cancelar" 
-        icon="pi pi-times" 
-        class="p-button-text botonCancelar"
-        type="button"
-        (click)="cancelarFormulario()">
-      </button>
-      
-      <div class="accionesDerecha">
-        <button 
-          pButton 
-          label="Guardar Borrador" 
-          icon="pi pi-save" 
-          class="p-button-secondary botonBorrador"
-          type="button"
-          (click)="guardarBorrador()"
-          *ngIf="esEdicion">
-        </button>
-        
-        <button 
-          pButton 
-          [label]="esEdicion ? 'Actualizar Película' : 'Crear Película'" 
-          [icon]="esEdicion ? 'pi pi-check' : 'pi pi-plus'" 
-          class="p-button-primary botonGuardar"
-          type="submit">
-        </button>
-      </div>
-    </div>
-  </ng-template>
+        <ng-template pTemplate="footer">
+          <button 
+            pButton 
+            label="Cancelar" 
+            icon="pi pi-times" 
+            class="p-button-text"
+            (click)="mostrarDialogoEdicion = false">
+          </button>
+          
+          <button 
+            pButton 
+            [label]="esEdicion ? 'Actualizar' : 'Crear'" 
+            icon="pi pi-check" 
+            class="p-button-primary"
+            type="submit">
+          </button>
+        </ng-template>
       </form>
     </p-dialog>
   </div>
-  <app-footer></app-footer>
+  <footer></footer>

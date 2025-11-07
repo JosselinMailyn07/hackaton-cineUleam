@@ -1242,3 +1242,745 @@
   }
     }
   }
+  // ... (mantener todos los estilos existentes) ...
+
+/* MEJORAS RESPONSIVAS */
+
+/* Header Container Responsive */
+.headerContainer {
+  @media (max-width: 768px) {
+    position: relative;
+  }
+  
+  @media (max-width: 480px) {
+    border-bottom-width: 2px;
+  }
+}
+
+/* Header Content Responsive */
+.headerContent {
+  @media (max-width: 1024px) {
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    min-height: 60px;
+  }
+}
+
+/* Header Left Responsive */
+.headerLeft {
+  @media (max-width: 1024px) {
+    gap: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
+}
+
+/* Logo Responsive */
+.logoContainer {
+  @media (max-width: 480px) {
+    &:hover {
+      transform: none; // Remover hover en móvil
+    }
+  }
+}
+
+.logoWrapper {
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
+}
+
+.logoIcono {
+  @media (max-width: 480px) {
+    font-size: 1.5rem;
+  }
+}
+
+.logoTitulo {
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 360px) {
+    font-size: 1rem;
+  }
+}
+
+.logoVersion {
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+.logoBadge {
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+/* Header Center Responsive */
+.headerCenter {
+  @media (max-width: 1024px) {
+    gap: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    flex: 1;
+    justify-content: flex-end;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
+}
+
+/* Búsqueda Móvil Compacta */
+.buscadorMovilCompacto {
+  .botonBuscarMovil {
+    color: var(--color-secundario) !important;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    
+    &:hover {
+      color: var(--color-primario) !important;
+      background: rgba(227, 6, 20, 0.1) !important;
+    }
+  }
+}
+
+/* Header Right Responsive */
+.headerRight {
+  @media (max-width: 1024px) {
+    gap: 0.75rem;
+  }
+  
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    flex: 0 0 auto;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.25rem;
+  }
+}
+
+/* Acciones Rápidas Responsive */
+.accionesRapidas {
+  @media (max-width: 768px) {
+    gap: 0.25rem;
+  }
+}
+
+.botonAccionMovil {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  
+  &:hover {
+    background: rgba(227, 6, 20, 0.1) !important;
+  }
+}
+
+.badgeNotificacionMovil {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: var(--color-primario);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 20px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Usuario Compacto Responsive */
+.usuarioCompacto {
+  @media (max-width: 480px) {
+    margin-left: 0;
+  }
+}
+
+.botonUsuario {
+  @media (max-width: 480px) {
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 18px;
+    
+    .usuarioNombreMini {
+      display: none;
+    }
+    
+    .iconoDropdown {
+      display: none;
+    }
+  }
+}
+
+.avatarMini {
+  @media (max-width: 480px) {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Acciones Login Responsive */
+.accionesLogin {
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.25rem;
+  }
+}
+
+.botonLogin, .botonRegistro {
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem !important;
+    min-width: auto;
+  }
+}
+
+.botonRegistro {
+  @media (max-width: 480px) {
+    background: var(--color-primario) !important;
+    border: none !important;
+    border-radius: 18px !important;
+  }
+}
+
+/* Botón Menú Móvil */
+.botonMenuMovil {
+  @media (max-width: 480px) {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    
+    &:hover {
+      background: rgba(227, 6, 20, 0.1) !important;
+    }
+  }
+}
+
+/* Menú Móvil Responsive */
+:host ::ng-deep .menuMovilResponsive {
+  .p-menu {
+    min-width: 200px;
+    
+    @media (max-width: 480px) {
+      min-width: 180px;
+      margin-top: 0.5rem;
+    }
+    
+    .p-menuitem-link {
+      padding: 0.75rem 1rem;
+      
+      @media (max-width: 480px) {
+        padding: 0.875rem 1rem;
+      }
+      
+      .p-menuitem-text {
+        font-size: 0.9rem;
+        
+        @media (max-width: 480px) {
+          font-size: 0.85rem;
+        }
+      }
+      
+      .p-menuitem-icon {
+        font-size: 0.9rem;
+        
+        @media (max-width: 480px) {
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+}
+
+/* Panel de Notificaciones Responsive */
+.panelNotificaciones {
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    margin-top: 0;
+    z-index: 1002;
+  }
+  
+  &.panelNotificacionesMovil {
+    .panelHeader {
+      @media (max-width: 480px) {
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        background: var(--color-superficie);
+        z-index: 1;
+      }
+    }
+    
+    .listaNotificaciones {
+      @media (max-width: 480px) {
+        max-height: calc(100vh - 80px);
+        padding-bottom: 2rem;
+      }
+    }
+  }
+}
+
+/* Modal de Búsqueda Móvil */
+.modalBusquedaMovil {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-superficie);
+  z-index: 1003;
+  display: flex;
+  flex-direction: column;
+  
+  .modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-borde);
+    
+    h3 {
+      margin: 0;
+      color: var(--color-texto);
+      font-size: 1.2rem;
+    }
+  }
+  
+  .modalContent {
+    flex: 1;
+    padding: 1rem;
+  }
+  
+  .buscadorInputGroupMovil {
+    margin-bottom: 1rem;
+    
+    .p-input-icon-left {
+      width: 100%;
+      
+      i {
+        left: 1rem;
+        color: var(--color-primario);
+      }
+    }
+    
+    .buscadorInputMovil {
+      width: 100%;
+      padding: 0.875rem 1rem 0.875rem 2.5rem !important;
+      border-radius: 12px;
+      border: 2px solid var(--color-borde);
+      font-size: 1rem;
+      
+      &:focus {
+        border-color: var(--color-primario) !important;
+        box-shadow: 0 0 0 2px rgba(227, 6, 20, 0.1) !important;
+      }
+    }
+  }
+  
+  .sugerenciasMovil {
+    .sugerenciasListaMovil {
+      .sugerenciaItemMovil {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--color-borde);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        &:hover {
+          background: rgba(227, 6, 20, 0.05);
+        }
+        
+        i {
+          color: var(--color-primario);
+        }
+        
+        span {
+          color: var(--color-texto);
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+/* Utilidades para móviles pequeños */
+@media (max-width: 360px) {
+  .headerContent {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .logoWrapper {
+    gap: 0.25rem;
+  }
+  
+  .logoTitulo {
+    font-size: 0.9rem;
+  }
+  
+  .logoIcono {
+    font-size: 1.25rem;
+  }
+  
+  .accionesLogin {
+    .botonRegistro {
+      padding: 0.35rem 0.5rem !important;
+      font-size: 0.65rem;
+    }
+  }
+}
+
+/* Estados de carga mejorados para móvil */
+@media (max-width: 480px) {
+  .cargandoContainer {
+    padding: 2rem 1rem;
+    
+    i {
+      font-size: 1.5rem;
+    }
+    
+    p {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+/* Mejoras de accesibilidad táctil */
+@media (max-width: 768px) {
+  .botonMenu,
+  .botonBuscarCompacto,
+  .botonAccion,
+  .botonUsuario,
+  .botonMenuMovil {
+    min-height: 44px; // Tamaño mínimo para touch
+    min-width: 44px;
+  }
+  
+  .navItem {
+    padding: 0.875rem 1rem; // Más padding para touch
+  }
+}
+
+/* Scroll suave para móviles */
+@media (max-width: 768px) {
+  .sugerenciasLista {
+    -webkit-overflow-scrolling: touch; // Scroll suave en iOS
+  }
+}
+
+/* Optimizaciones de rendimiento para móviles */
+@media (max-width: 768px) {
+  .headerContainer {
+    transform: translateZ(0); // Aceleración hardware
+    will-change: transform;
+  }
+  /* PANEL DE NAVEGACIÓN MÓVIL */
+.panelNavegacionMovil {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 85%;
+  max-width: 300px;
+  height: 100vh;
+  background: var(--color-superficie);
+  z-index: 1004;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+  
+  &.panelNavegacionAbierto {
+    left: 0;
+  }
+  
+  @media (min-width: 769px) {
+    display: none;
+  }
+}
+
+.panelNavegacionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-borde);
+  background: linear-gradient(135deg, var(--color-primario) 0%, #d90429 100%);
+  color: white;
+  
+  h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  button {
+    color: white !important;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+  }
+}
+
+.navegacionMovil {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 0;
+}
+
+.navItemMovil {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  color: var(--color-texto);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+  
+  &:hover {
+    background: rgba(227, 6, 20, 0.05);
+    color: var(--color-primario);
+    border-left-color: var(--color-primario);
+    
+    i:first-child {
+      color: var(--color-primario);
+      transform: scale(1.1);
+    }
+    
+    i:last-child {
+      transform: translateX(3px);
+    }
+  }
+  
+  i:first-child {
+    color: var(--color-secundario);
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  
+  i:last-child {
+    color: var(--color-texto-secundario);
+    font-size: 0.8rem;
+    margin-left: auto;
+    transition: all 0.2s ease;
+  }
+}
+
+.navItemMovilActivo {
+  background: rgba(227, 6, 20, 0.1) !important;
+  color: var(--color-primario) !important;
+  border-left-color: var(--color-primario) !important;
+  font-weight: 600;
+  
+  i:first-child {
+    color: var(--color-primario) !important;
+  }
+}
+
+.navTextoMovil {
+  font-weight: 500;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.separadorMovil {
+  height: 1px;
+  background: var(--color-borde);
+  margin: 0.5rem 1.5rem;
+}
+
+.panelNavegacionFooter {
+  padding: 1.5rem;
+  border-top: 1px solid var(--color-borde);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.botonCerrarSesionMovil {
+  width: 100%;
+  justify-content: center;
+  
+  &:hover {
+    background: rgba(220, 53, 69, 0.1) !important;
+  }
+}
+
+.accionesLoginMovil {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  
+  button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.botonLoginMovil, .botonRegistroMovil {
+  padding: 0.75rem !important;
+  font-weight: 600;
+}
+
+/* Overlay para menú móvil */
+.overlayMenuMovil {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 1003;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    &.overlayVisible {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    display: none;
+  }
+}
+
+/* MEJORAS ESPECÍFICAS PARA MÓVILES PEQUEÑOS */
+@media (max-width: 480px) {
+  .panelNavegacionMovil {
+    width: 90%;
+    max-width: 280px;
+  }
+  
+  .panelNavegacionHeader {
+    padding: 1rem 1.25rem;
+    
+    h3 {
+      font-size: 1.1rem;
+    }
+  }
+  
+  .navItemMovil {
+    padding: 0.875rem 1.25rem;
+    gap: 0.875rem;
+  }
+  
+  .navTextoMovil {
+    font-size: 0.9rem;
+  }
+  
+  .panelNavegacionFooter {
+    padding: 1.25rem;
+  }
+}
+
+/* Estilos para botones móviles mejorados */
+.botonUsuarioMovil {
+  padding: 0.25rem !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+}
+
+.avatarMiniMovil {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 0.8rem !important;
+}
+
+.botonRegistroMovil {
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.8rem !important;
+  min-width: 60px !important;
+}
+
+.accionesRapidasMovil {
+  margin-right: 0.25rem;
+}
+
+/* Animación de entrada mejorada */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.panelNavegacionMovil.panelNavegacionAbierto {
+  animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scrollbar personalizado para navegación móvil */
+.navegacionMovil::-webkit-scrollbar {
+  width: 4px;
+}
+
+.navegacionMovil::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.navegacionMovil::-webkit-scrollbar-thumb {
+  background: var(--color-secundario);
+  border-radius: 2px;
+}
+
+.navegacionMovil::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primario);
+}
+}
