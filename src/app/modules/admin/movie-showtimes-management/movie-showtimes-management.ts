@@ -19,7 +19,7 @@ import { TooltipModule } from 'primeng/tooltip';
 // import { InputNumberModule } from 'primeng/inputnumber';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { HeaderComponent } from '@shared/header/header';
+import { HeaderAdminComponent } from '../header-admin/header-admin';
 import { FooterComponent } from '@shared/footer/footer';
 
 // Interfaces para tipos de datos
@@ -62,7 +62,7 @@ interface Pelicula {
     TagModule,
     ToastModule,
     TooltipModule,
-   HeaderComponent,
+   HeaderAdminComponent,
    FooterComponent
     // DropdownModule,
     // CalendarModule,

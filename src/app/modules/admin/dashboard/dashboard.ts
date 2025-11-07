@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
-import { HeaderComponent } from '@shared/header/header';
+import { HeaderAdminComponent } from '../header-admin/header-admin';
 import { FooterComponent } from '@shared/footer/footer';
 
 // Interfaz para estadísticas
@@ -20,7 +20,7 @@ interface EstadisticaDashboard {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, HeaderComponent,FooterComponent],
+  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, HeaderAdminComponent, FooterComponent, HeaderAdminComponent],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })

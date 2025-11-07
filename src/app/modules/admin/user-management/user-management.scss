@@ -1,0 +1,511 @@
+.gestionUsuariosContainer {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  /* Header y Acciones */
+  .headerAcciones {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+  
+  .headerInfo {
+    .tituloPagina {
+      color: var(--color-texto);
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .descripcionPagina {
+      color: var(--color-texto-secundario);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+  }
+  
+  .botonNuevoUsuario {
+    flex-shrink: 0;
+  }
+  
+  /* Estadísticas */
+  .estadisticasUsuarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .tarjetaEstadistica {
+    background: var(--color-superficie);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid;
+  }
+  
+  .estadisticaIcono {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .estadisticaContenido {
+    flex: 1;
+    
+    h3 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-texto);
+      margin: 0 0 0.25rem 0;
+      line-height: 1;
+    }
+    
+    p {
+      margin: 0 0 0.25rem 0;
+      font-weight: 600;
+      color: var(--color-texto);
+    }
+    
+    .porcentaje {
+      font-size: 0.85rem;
+      color: var(--color-texto-secundario);
+      font-weight: 500;
+    }
+  }
+  
+  /* Filtros */
+  .filtrosContainer {
+    background: var(--color-superficie);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .filtrosGrupo {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    ::ng-deep .p-dropdown,
+    ::ng-deep .p-inputtext {
+      min-width: 200px;
+      
+      @media (max-width: 768px) {
+        min-width: auto;
+      }
+    }
+  }
+  
+  /* Tabla de Usuarios */
+  .tablaContainer {
+    background: var(--color-superficie);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  /* Información de Usuario en tabla */
+  .infoUsuario {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .detallesUsuario {
+    flex: 1;
+    min-width: 0;
+    
+    .nombreUsuario {
+      margin: 0 0 0.25rem 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-texto);
+      line-height: 1.2;
+    }
+    
+    .emailUsuario {
+      margin: 0 0 0.25rem 0;
+      font-size: 0.85rem;
+      color: var(--color-texto-secundario);
+    }
+    
+    .infoAdicional {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--color-texto-secundario);
+    }
+  }
+  
+  /* Información de Rol */
+  .infoRol {
+    .descripcionRol {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--color-texto-secundario);
+      margin-top: 0.25rem;
+      line-height: 1.2;
+    }
+  }
+  
+  /* Fechas */
+  .fechaRegistro,
+  .ultimoAcceso {
+    font-size: 0.9rem;
+    color: var(--color-texto);
+  }
+  
+  .sinAcceso {
+    font-size: 0.85rem;
+    color: var(--color-texto-secundario);
+    font-style: italic;
+  }
+  
+  /* Reservas */
+  .infoReservas {
+    text-align: center;
+  }
+  
+  /* Acciones */
+  .accionesUsuario {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    
+    .botonEditar {
+      color: var(--color-primario);
+      
+      &:hover {
+        background: rgba(227, 6, 20, 0.1);
+      }
+    }
+    
+    .botonActivar {
+      color: #10b981;
+      
+      &:hover {
+        background: rgba(16, 185, 129, 0.1);
+      }
+    }
+    
+    .botonDesactivar {
+      color: #f59e0b;
+      
+      &:hover {
+        background: rgba(245, 158, 11, 0.1);
+      }
+    }
+    
+    .botonRoles {
+      color: #8b5cf6;
+      
+      &:hover {
+        background: rgba(139, 92, 246, 0.1);
+      }
+    }
+    
+    .botonEliminar {
+      color: #ef4444;
+      
+      &:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+  
+  /* Estados de carga y vacío */
+  .cargandoContainer {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-texto-secundario);
+    
+    p {
+      margin: 1rem 0 0 0;
+    }
+  }
+  
+  .vacioContainer {
+    padding: 3rem;
+  }
+  
+  .vacioContent {
+    text-align: center;
+    color: var(--color-texto-secundario);
+    
+    h3 {
+      margin: 1rem 0 0.5rem 0;
+      color: var(--color-texto);
+    }
+    
+    p {
+      margin: 0 0 1.5rem 0;
+    }
+  }
+  
+  /* Diálogo de Formulario */
+  .formularioUsuario {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+  
+  .seccionFormulario {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-borde);
+    
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+  }
+  
+  .tituloSeccion {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-texto);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-primario);
+  }
+  
+  .campoFormulario {
+    margin-bottom: 1.5rem;
+    
+    label {
+      display: block;
+      font-weight: 600;
+      color: var(--color-texto);
+      margin-bottom: 0.5rem;
+    }
+    
+    input, ::ng-deep .p-dropdown {
+      width: 100%;
+    }
+  }
+  
+  .camposGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .errorValidacion {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+  
+  /* Opción personalizada para roles */
+  .opcionRol {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    
+    i {
+      font-size: 1.25rem;
+      width: 24px;
+      text-align: center;
+    }
+    
+    div {
+      flex: 1;
+      
+      div {
+        font-weight: 600;
+        color: var(--color-texto);
+      }
+      
+      small {
+        color: var(--color-texto-secundario);
+        font-size: 0.8rem;
+      }
+    }
+  }
+  
+  /* Información del Rol Seleccionado */
+  .infoRolSeleccionado {
+    background: rgba(227, 6, 20, 0.05);
+    border: 1px solid rgba(227, 6, 20, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    
+    h4 {
+      margin: 0 0 0.75rem 0;
+      color: var(--color-primario);
+      font-size: 1rem;
+    }
+  }
+  
+  .listaPermisos {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .permisoItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-texto);
+    
+    i {
+      color: #10b981;
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Estilos para el footer del formulario */
+  .footerFormulario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 1rem 0 0 0;
+    border-top: 1px solid var(--color-borde);
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+    }
+  }
+  
+  /* Estilos específicos para los botones */
+  .botonCancelar {
+    color: var(--color-texto-secundario);
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+  
+  .botonGuardar {
+    background: var(--color-primario);
+    border-color: var(--color-primario);
+    
+    &:hover {
+      background: var(--color-primario-hover);
+      border-color: var(--color-primario-hover);
+    }
+  }
+  
+  /* Mejoras para el diálogo completo */
+  ::ng-deep .p-dialog {
+    .p-dialog-content {
+      padding-bottom: 0;
+    }
+    
+    .p-dialog-footer {
+      padding: 1.5rem;
+      background: var(--color-superficie);
+      border-top: 1px solid var(--color-borde);
+    }
+  }
+  
+  /* Estados del formulario */
+  .formularioUsuario {
+    .campoObligatorio {
+      label::after {
+        content: " *";
+        color: #ef4444;
+      }
+    }
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .gestionUsuariosContainer {
+      padding: 1rem;
+    }
+    
+    .estadisticasUsuarios {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .infoUsuario {
+      flex-direction: column;
+      text-align: center;
+      gap: 0.5rem;
+    }
+    
+    .accionesUsuario {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    ::ng-deep .p-dialog {
+      width: 95vw !important;
+      margin: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .headerInfo {
+      .tituloPagina {
+        font-size: 1.5rem;
+      }
+      
+      .descripcionPagina {
+        font-size: 1rem;
+      }
+    }
+    
+    .estadisticasUsuarios {
+      grid-template-columns: 1fr;
+    }
+    
+    .tablaContainer {
+      border-radius: 8px;
+    }
+  }
+  
+  /* Scrollbar personalizado */
+  .formularioUsuario::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .formularioUsuario::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 3px;
+  }
+  
+  .formularioUsuario::-webkit-scrollbar-thumb {
+    background: var(--color-secundario);
+    border-radius: 3px;
+  }
+  
+  .formularioUsuario::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primario);
+  }

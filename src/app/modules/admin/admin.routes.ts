@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard';
 import { MovieManagementComponent } from './movie-management/movie-management';
-import { UserManagement } from './user-management/user-management';
+import { UserManagementComponent } from './user-management/user-management';
 import { Report } from './report/report';
 
 export const routesAdmin: Routes = [
@@ -19,7 +19,7 @@ export const routesAdmin: Routes = [
     },
     {
         path: 'user-management',
-        loadComponent: () => import('./user-management/user-management').then(m => m.UserManagement),
+        loadComponent: () => import('./user-management/user-management').then(m => m.UserManagementComponent),
     },
     {
         path: 'report',

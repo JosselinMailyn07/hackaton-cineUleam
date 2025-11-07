@@ -16,7 +16,7 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService, Footer } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { HeaderComponent } from '@shared/header/header';
+import { HeaderAdminComponent } from '../header-admin/header-admin';
 import { FooterComponent } from '@shared/footer/footer';
 
 // Interfaces para tipos de datos
@@ -60,10 +60,10 @@ interface Pelicula {
     TagModule,
     TooltipModule,
     ToastModule,
-    HeaderComponent,
+    HeaderAdminComponent,
     FooterComponent
 ],
-  providers: [MessageService, ConfirmationService, HeaderComponent,FooterComponent],
+  providers: [MessageService, ConfirmationService, HeaderAdminComponent,FooterComponent],
   templateUrl: './movie-management.html',
   styleUrls: ['./movie-management.scss']
 })

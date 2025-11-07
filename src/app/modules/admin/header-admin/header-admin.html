@@ -1,0 +1,281 @@
+<header class="headerContainer">
+    <div class="headerContent">
+      <!-- Sección Izquierda - Logo y Navegación -->
+      <div class="headerLeft">
+        @if (mostrarBotonMenu) {
+        <button 
+          pButton 
+          icon="pi pi-bars" 
+          class="p-button-text p-button-plain botonMenu"
+          (click)="alternarMenu()"
+          pTooltip="Menú principal"
+          tooltipPosition="bottom">
+        </button>
+        }
+        
+        <div class="logoContainer" routerLink="/inicio">
+          <div class="logoWrapper">
+          <div class="logoIcono">
+            <i class="pi pi-play-circle"></i>
+          </div>
+          <div class="logoTexto">
+            <span class="logoTitulo">Cine ULEAM</span>
+            <span class="logoVersion">4.0</span>
+          </div>
+        </div>
+          <div class="logoBadge">Beta</div>
+        </div>
+  
+        @if (!esMovil) {
+        <nav class="navegacionPrincipal">
+          <a 
+            *ngFor="let item of itemsNavegacion"
+            class="navItem"
+            [routerLink]="item.ruta"
+            routerLinkActive="navItemActivo">
+            <i [class]="item.icono"></i>
+            <span class="navTexto">{{ item.texto }}</span>
+            <span class="navIndicador"></span>
+          </a>
+        </nav>
+        }
+      </div>
+  
+      <!-- Sección Central - Búsqueda y Estado -->
+      <div class="headerCenter">
+        <!-- Búsqueda Interactiva -->
+        @if (mostrarBuscador) {
+        <div class="buscadorContainer">
+            <div class="buscadorWrapper" [class.buscadorExpandido]="buscadorExpandido">
+              
+              <!-- Estado Compacto - Solo Icono -->
+              @if (!buscadorExpandido) {
+              <div class="buscadorCompacto">
+                <button 
+                  pButton 
+                  icon="pi pi-search" 
+                  class="p-button-text p-button-plain botonBuscarCompacto"
+                  (click)="expandirBuscador()"
+                  pTooltip="Buscar películas"
+                  tooltipPosition="bottom">
+                </button>
+              </div>
+              }
+          
+              <!-- Estado Expandido - Input Completo -->
+              @if (buscadorExpandido) {
+              <div class="buscadorExpandidoContent">
+                <div class="buscadorInputGroup">
+                  <span class="p-input-icon-left iconoBusqueda">
+                    <i class="pi pi-search"></i>
+                    <input 
+                      type="text" 
+                      pInputText 
+                      placeholder="Buscar películas..." 
+                      [(ngModel)]="terminoBusqueda"
+                      (keyup.enter)="realizarBusqueda()"
+                      (input)="onBuscarInput()"
+                      (blur)="onBuscarBlur()"
+                      class="buscadorInput"
+                      #buscadorInput
+                      autocomplete="off" />
+                  </span>
+                  
+                  <!-- Botón Cerrar Búsqueda -->
+                  <button 
+                    pButton 
+                    icon="pi pi-times" 
+                    class="p-button-text p-button-plain botonCerrarBusqueda"
+                    (click)="contraerBuscador()"
+                    pTooltip="Cerrar búsqueda"
+                    tooltipPosition="bottom">
+                  </button>
+                </div>
+          
+                <!-- Sugerencias -->
+                @if (mostrarSugerencias && terminoBusqueda && sugerencias.length > 0) {
+                <div class="sugerenciasWrapper">
+                  <div class="sugerenciasContainer">
+                    <div class="sugerenciaHeader">
+                      <span class="sugerenciaTitulo">Sugerencias</span>
+                      <span class="sugerenciaContador">{{ sugerencias.length }} resultados</span>
+                    </div>
+                    
+                    <div class="sugerenciasLista">
+                      <div 
+                        class="sugerenciaItem" 
+                        *ngFor="let sugerencia of sugerencias; trackBy: trackBySugerencia"
+                        (click)="seleccionarSugerencia(sugerencia)"
+                        (mousedown)="prevenirBlur($event)">
+                        <div class="sugerenciaIcono">
+                          <i class="pi pi-search"></i>
+                        </div>
+                        <div class="sugerenciaTexto">
+                          <span class="sugerenciaTermino">{{ sugerencia }}</span>
+                          <span class="sugerenciaTipo">Película</span>
+                        </div>
+                        <div class="sugerenciaAccion">
+                          <i class="pi pi-arrow-right"></i>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="sugerenciaFooter">
+                      <span class="sugerenciaAyuda">Presiona Enter para buscar</span>
+                    </div>
+                  </div>
+                </div>
+                }
+              </div>
+              }
+            </div>
+          
+            <!-- Overlay para cerrar búsqueda al hacer clic fuera -->
+            @if (buscadorExpandido && mostrarSugerencias) {
+            <div 
+              class="buscadorOverlay" 
+              (click)="contraerBuscador()">
+            </div>
+            }
+          </div>
+          }
+  
+        <!-- Indicadores de Estado -->
+        <!-- <div class="indicadoresContainer" *ngIf="!esMovil">
+          <div class="indicadorItem" pTooltip="Películas en cartelera" tooltipPosition="bottom">
+            <i class="pi pi-film"></i>
+            <span class="indicadorValor">{{ contadores.peliculas }}</span>
+          </div>
+          <div class="indicadorItem" pTooltip="Próximos estrenos" tooltipPosition="bottom">
+            <i class="pi pi-star"></i>
+            <span class="indicadorValor">{{ contadores.estrenos }}</span>
+          </div>
+        </div> -->
+      </div>
+  
+      <!-- Sección Derecha - Usuario y Acciones -->
+      <div class="headerRight">
+          <!-- Notificaciones -->
+        @if (usuarioLogueado && !esMovil) {
+        <div class="accionesRapidas">
+          <button 
+            pButton 
+            icon="pi pi-bell" 
+            class="p-button-text p-button-plain botonAccion"
+            (click)="alternarNotificaciones()"
+            pTooltip="Notificaciones"
+            tooltipPosition="bottom">
+            @if (notificacionesNoLeidas > 0) {
+            <span class="badgeNotificacion">
+              {{ notificacionesNoLeidas }}
+            </span>
+            }
+          </button>
+  
+          <!-- Carrito/Reservas -->
+          <!-- <button 
+            pButton 
+            icon="pi pi-shopping-cart" 
+            class="p-button-text p-button-plain botonAccion"
+            pTooltip="Mis reservas"
+            tooltipPosition="bottom"
+            routerLink="/reservas">
+          </button> -->
+        </div>
+        }
+  
+        <!-- Modo Oscuro/Claro -->
+            <!-- <button 
+              pButton 
+          [icon]="modoOscuro ? 'pi pi-sun' : 'pi pi-moon'" 
+          class="p-button-text p-button-plain botonTema"
+          (click)="alternarTema()"
+          pTooltip="{{ modoOscuro ? 'Modo claro' : 'Modo oscuro' }}"
+          tooltipPosition="bottom">
+            </button> -->
+  
+       <!-- En el header, reemplaza la sección del usuario -->
+@if (usuarioLogueado) {
+<div class="usuarioCompacto">
+    <p-menu 
+      #menu 
+      [model]="itemsMenu" 
+      [popup]="true" 
+      styleClass="menuUsuarioSuperior"
+      [appendTo]="'body'">
+    </p-menu>
+    
+    <button 
+      pButton 
+      class="p-button-text p-button-plain botonUsuario"
+      (click)="menu.toggle($event)">
+      <div class="avatarMini">
+        {{ obtenerIniciales(usuarioLogueado.nombre) }}
+      </div>
+      @if (!esMovilPequena) {
+      <span class="usuarioNombreMini">
+        {{ usuarioLogueado.nombre.split(' ')[0] }}
+      </span>
+      }
+      <i class="pi pi-chevron-down iconoDropdown"></i>
+    </button>
+  </div>
+  }
+  
+        <!-- Estado de Login -->
+        @if (!usuarioLogueado) {
+        <div class="accionesLogin">
+            <button 
+              pButton 
+            label="Iniciar Sesión" 
+            class="p-button-outlined botonLogin"
+            routerLink="/login">
+          </button>
+          <button 
+            pButton 
+            label="Registrarse" 
+            class="p-button-primary botonRegistro"
+            routerLink="/registro">
+            </button>
+          </div>
+          }
+  
+        <!-- Menú móvil -->
+          @if (esMovil) {
+          <button 
+            pButton 
+            icon="pi pi-ellipsis-v" 
+            class="p-button-text p-button-plain botonMenuMovil"
+          (click)="menuMovil.toggle($event)">
+          </button>
+          }
+          <p-menu #menuMovil [model]="itemsMenuMovil" [popup]="true"></p-menu>
+        </div>
+      </div>
+   
+    <!-- Panel de Notificaciones -->
+    @if (mostrarPanelNotificaciones) {
+    <div class="panelNotificaciones">
+      <div class="panelHeader">
+        <h3>Notificaciones</h3>
+        <button 
+          pButton 
+          icon="pi pi-times" 
+          class="p-button-text p-button-plain"
+          (click)="cerrarNotificaciones()">
+        </button>
+      </div>
+      <div class="listaNotificaciones">
+        <div class="notificacionItem" *ngFor="let notificacion of notificaciones">
+          <div class="notificacionIcono">
+            <i [class]="notificacion.icono"></i>
+          </div>
+          <div class="notificacionContenido">
+            <p class="notificacionTitulo">{{ notificacion.titulo }}</p>
+            <p class="notificacionTiempo">{{ notificacion.tiempo }}</p>
+          </div>
+          </div>
+        </div>
+      </div>
+      }
+    </header>
