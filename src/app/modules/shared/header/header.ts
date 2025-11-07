@@ -35,16 +35,19 @@ export class HeaderComponent implements OnInit {
   mostrarPanelNotificaciones: boolean = false;
   modoOscuro: boolean = false;
   esMovil: boolean = false;
-
+  preventClose: boolean = false;
+  
+  @ViewChild('buscadorInput') buscadorInput!: ElementRef<HTMLInputElement>;
+  
   // Datos de usuario
   usuarioLogueado: any = null;
-
+  
   // Datos de ejemplo
   itemsNavegacion = [
     { texto: 'Cartelera', icono: 'pi pi-play', ruta: '/cartelera' },
     { texto: 'Estrenos', icono: 'pi pi-star', ruta: '/estrenos' },
     { texto: 'Próximamente', icono: 'pi pi-calendar', ruta: '/proximamente' },
-    { texto: 'Promociones', icono: 'pi pi-tag', ruta: '/promociones' }
+    // { texto: 'Promociones', icono: 'pi pi-tag', ruta: '/promociones' }
   ];
 
   sugerencias = [
@@ -73,7 +76,11 @@ export class HeaderComponent implements OnInit {
       tiempo: 'Hace 1 día',
       icono: 'pi pi-star'
     },
-   
+    {
+      titulo: 'Promoción especial para estudiantes',
+      tiempo: 'Hace 2 días',
+      icono: 'pi pi-tag'
+    }
   ];
 
   notificacionesNoLeidas = 2;
@@ -90,11 +97,6 @@ export class HeaderComponent implements OnInit {
   @HostListener('window:resize')
   onResize() {
     this.verificarViewport();
-    
-    // Cerrar búsqueda si se cambia a móvil
-    if (this.esMovil && this.buscadorExpandido) {
-      this.contraerBuscador();
-    }
   }
 
   verificarViewport() {
@@ -159,55 +161,107 @@ export class HeaderComponent implements OnInit {
     this.menuAlternado.emit();
   }
 
-  expandirBuscador() {
-    this.buscadorExpandido = true;
-    this.mostrarSugerencias = true;
-  }
-
-  contraerBuscador() {
-    setTimeout(() => {
-    this.buscadorExpandido = false;
-      this.mostrarSugerencias = false;
-    }, 200);
-  }
-
-  realizarBusqueda() {
-    if (this.terminoBusqueda.trim()) {
-      console.log('Buscando:', this.terminoBusqueda);
-      // Implementar lógica de búsqueda real
-      this.terminoBusqueda = '';
-      this.buscadorExpandido = false;
-      this.mostrarSugerencias = false;
+ // Métodos para la búsqueda
+expandirBuscador() {
+  this.buscadorExpandido = true;
+  this.mostrarSugerencias = true;
+  
+  // Enfocar el input después de la animación
+  setTimeout(() => {
+    if (this.buscadorInput) {
+      this.buscadorInput.nativeElement.focus();
     }
+  }, 150);
+}
+contraerBuscador() {
+  this.buscadorExpandido = false;
+  this.mostrarSugerencias = false;
+  this.terminoBusqueda = '';
+}
+onBuscarInput() {
+  // Filtrar sugerencias basado en el término de búsqueda
+  if (this.terminoBusqueda.trim().length > 0) {
+    this.filtrarSugerencias();
+  } else {
+    this.sugerencias = [];
   }
+}
 
-  alternarNotificaciones() {
-    this.mostrarPanelNotificaciones = !this.mostrarPanelNotificaciones;
-    if (this.mostrarPanelNotificaciones) {
-      this.notificacionesNoLeidas = 0;
+onBuscarBlur() {
+  // Pequeño delay para permitir clicks en sugerencias
+  setTimeout(() => {
+    if (!this.preventClose) {
+      this.contraerBuscador();
     }
-  }
+  }, 200);
+}
+prevenirBlur(event: MouseEvent) {
+  event.preventDefault();
+  this.preventClose = true;
+  
+  setTimeout(() => {
+    this.preventClose = false;
+  }, 300);
+}
 
-  cerrarNotificaciones() {
-    this.mostrarPanelNotificaciones = false;
+filtrarSugerencias() {
+  const term = this.terminoBusqueda.toLowerCase();
+  const todasSugerencias = [
+    'Avengers: Endgame',
+    'The Batman', 
+    'Spider-Man: No Way Home',
+    'Dune: Part Two',
+    'Acción',
+    'Comedia',
+    'Drama',
+    'Terror',
+    'Ciencia Ficción'
+  ];
+  
+  this.sugerencias = todasSugerencias.filter(sugerencia =>
+    sugerencia.toLowerCase().includes(term)
+  ).slice(0, 5); // Limitar a 5 sugerencias
+}
+alternarNotificaciones() {
+  this.mostrarPanelNotificaciones = !this.mostrarPanelNotificaciones;
+  if (this.mostrarPanelNotificaciones) {
+    this.notificacionesNoLeidas = 0;
   }
+}
 
-  alternarTema() {
-    this.modoOscuro = !this.modoOscuro;
-    // Implementar cambio de tema global
-    document.body.classList.toggle('dark-mode', this.modoOscuro);
-  }
+cerrarNotificaciones() {
+  this.mostrarPanelNotificaciones = false;
+}
 
-  obtenerIniciales(nombre: string): string {
-    return nombre
+seleccionarSugerencia(sugerencia: string) {
+  this.terminoBusqueda = sugerencia;
+  this.realizarBusqueda();
+}
+
+obtenerIniciales(nombre: string): string {
+  return nombre
       .split(' ')
       .map(n => n[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);
-  }
+}
+trackBySugerencia(index: number, sugerencia: string): string {
+  return sugerencia;
+}
 
-  cerrarSesion() {
-    console.log('Cerrando sesión...');
+realizarBusqueda() {
+  if (this.terminoBusqueda.trim()) {
+    console.log('Buscando:', this.terminoBusqueda);
+    // Navegar a página de resultados
+    this.contraerBuscador();
   }
+}
+cerrarSesion() {
+  // Lógica para cerrar sesión
+  console.log('Cerrando sesión...');
+  this.usuarioLogueado = null;
+  // Aquí se podría llamar a un servicio de autenticación
+  // Ejemplo: this.authService.logout();
+}
 }
