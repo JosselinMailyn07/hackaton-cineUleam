@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { CarouselModule } from 'primeng/carousel';
+import { ButtonModule } from 'primeng/button';
+import { BrowserModule } from '@angular/platform-browser';
 
 interface Pelicula {
   id: number;
@@ -10,8 +13,12 @@ interface Pelicula {
   textoBoton: string;
 }
 @Component({
-  selector: 'app-cartelera',
-  imports: [],
+  selector: 'cartelera',
+  imports: [
+    BrowserModule,
+    CarouselModule,
+    ButtonModule
+  ],
   templateUrl: './cartelera.html',
   styleUrl: './cartelera.scss',
 })
@@ -56,6 +63,23 @@ export class Cartelera {
       descripcion:
         'Miles Morales se embarca en una nueva aventura multiversal junto a Gwen Stacy y un ejército de Spider-Personas.',
       textoBoton: 'Ver ahora'
+    }
+  ];
+  opcionesResponsivas = [
+    {
+      breakpoint: '1024px',
+      numVisible: 3,
+      numScroll: 1,
+    },
+    {
+      breakpoint: '768px',
+      numVisible: 2,
+      numScroll: 1,
+    },
+    {
+      breakpoint: '560px',
+      numVisible: 1,
+      numScroll: 1,
     }
   ];
 }
