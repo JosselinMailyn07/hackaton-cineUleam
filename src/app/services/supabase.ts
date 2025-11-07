@@ -251,7 +251,7 @@ export class Supabase {
     // Asumo datos = { limit: 20 }
     const { data, error } = await this.supabase
       .from('peliculas')
-      .select(`*`)
+      .select('*')
       .order('create_at', { ascending: false }) // Más nuevas primero
       .limit(datos.limit);
     if (error) throw error;

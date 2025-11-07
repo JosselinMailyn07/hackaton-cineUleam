@@ -85,26 +85,24 @@
     <div class="recientesCard">
       <p-card header="Películas Recientes">
         <div class="recientesLista">
-          <div 
-            *ngFor="let pelicula of peliculasRecientes" 
-            class="peliculaReciente">
-            
-            <img 
-              [src]="pelicula.imagen" 
-              [alt]="pelicula.titulo"
-              class="peliculaImagen">
-            
+          <div *ngFor="let pelicula of peliculasRecientes" class="peliculaReciente">
+
+            <img [src]="pelicula.imagen" [alt]="pelicula.titulo" class="peliculaImagen">
+          
             <div class="peliculaInfo">
               <h4 class="peliculaTitulo">{{ pelicula.titulo }}</h4>
-              <p class="peliculaFecha">Estreno: {{ pelicula.fechaEstreno }}</p>
-              <span 
-                class="estadoBadge" 
-                [class.estado-activa]="pelicula.estado === 'activa'"
-                [class.estado-inactiva]="pelicula.estado === 'inactiva'">
+              <p class="peliculaFecha">Estreno: {{ pelicula.fechaEstreno | date:'dd/MM/yyyy' }}</p>
+              <p class="peliculaCategoria">Categoría: {{ pelicula.categorias }}</p>
+          
+              <span class="estadoBadge"
+                    [class.estado-activa]="pelicula.estado === 'activa'"
+                    [class.estado-inactiva]="pelicula.estado === 'inactiva'">
                 {{ pelicula.estado | titlecase }}
               </span>
             </div>
+          
           </div>
+          
         </div>
         
         <div class="verTodoContainer">
@@ -124,15 +122,16 @@
       <!-- Gráfico de Reservas -->
       <div class="metricaCard">
         <p-card header="Reservas Semanales" class="graficoCard">
-          <p-chart 
-            type="line" 
-            [data]="datosGraficoReservas" 
-            [options]="opcionesGrafico" 
-            height="300px">
-          </p-chart>
+          <!-- Verifica que NgModules de PrimeNG ChartModule esté importado correctamente en tu módulo -->
+          <p-chart
+          [type]="'line'"
+          [data]="datosGraficoReservas"
+          [options]="opcionesGrafico"
+          height="300px">
+        </p-chart>
+        
         </p-card>
       </div>
-  
      
     </div>
   

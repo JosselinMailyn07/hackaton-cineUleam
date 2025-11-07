@@ -38,8 +38,8 @@
           <tr>
             <th>Película</th>
             <th>Sala</th>
-            <th>Fecha y Hora</th>
-            <th>Asientos</th>
+            <th>Fecha y Hora Inicio</th>
+            <th>Fecha y Hora Fin</th>
             <th>Estado</th>
             <th style="width: 150px">Acciones</th>
           </tr>
@@ -64,59 +64,40 @@
             <td>
               <div class="infoFuncion">
                 <div class="detallesFuncion">
-                  <h4 class="tituloPelicula">{{ funcion.peliculaTitulo }}</h4>
-                  <p class="fechaHora">{{ formatearFechaHora(funcion) }}</p>
+                  <h4 class="tituloPelicula">{{ funcion.pelicula_nombre }}</h4>
+                  <p class="duracionPelicula" *ngIf="funcion.pelicula_duracion">
+                    {{ formatearDuracion(funcion.pelicula_duracion) }}
+                  </p>
                 </div>
               </div>
             </td>
   
             <!-- Columna Sala -->
             <td>
-              <div class="salaTipo">
-                <span class="salaInfo">
-                  {{ funcion.sala }}
-                </span>
-                <p-tag 
-                  [value]="funcion.tipo" 
-                  severity="info"
-                  styleClass="tagTipo">
-                </p-tag>
-              </div>
+              <span class="salaInfo">
+                {{ funcion.sala_nombre }}
+              </span>
             </td>
   
-            <!-- Columna Fecha y Hora -->
+            <!-- Columna Fecha y Hora Inicio -->
             <td>
-              <div class="fechaHoraCompleta">
-                <span class="fecha">{{ formatearFecha(funcion.fecha) }}</span>
-                <span class="hora">{{ funcion.hora }}</span>
-              </div>
+              <span class="fechaHora">
+                {{ formatearFechaHora(funcion.fecha_hora_inicio) }}
+              </span>
             </td>
   
-            <!-- Columna Asientos -->
+            <!-- Columna Fecha y Hora Fin -->
             <td>
-              <div class="infoAsientos">
-                <div class="barraOcupacion">
-                  <div class="barraFondo">
-                    <div 
-                      class="barraProgreso" 
-                      [style.width.%]="calcularOcupacion(funcion)"
-                      [class.barra-completa]="funcion.estado === 'completa'"
-                      [class.barra-disponible]="funcion.estado === 'activa'"
-                      [class.barra-cancelada]="funcion.estado === 'cancelada'">
-                    </div>
-                  </div>
-                  <span class="textoAsientos">
-                    {{ funcion.asientosDisponibles }}/{{ funcion.asientosTotales }}
-                  </span>
-                </div>
-              </div>
+              <span class="fechaHora">
+                {{ formatearFechaHora(funcion.fecha_hora_fin) }}
+              </span>
             </td>
   
             <!-- Columna Estado -->
             <td>
               <p-tag 
-                [value]="funcion.estado | titlecase"
-                [severity]="obtenerSeveridadEstado(funcion.estado)">
+                [value]="obtenerTextoEstado(funcion)"
+                [severity]="obtenerSeveridadEstado(funcion)">
               </p-tag>
             </td>
   
@@ -169,28 +150,102 @@
       </p-table>
     </div>
   
-    <!-- Diálogo simplificado temporalmente -->
+    <!-- Diálogo de Edición/Creación -->
     <p-dialog 
       [(visible)]="mostrarDialogoEdicion" 
-      [style]="{ width: '90vw', maxWidth: '500px' }"
+      [style]="{ width: '90vw', maxWidth: '600px' }"
       [modal]="true" 
       [closable]="true"
-      [header]="esEdicion ? 'Editar Función' : 'Nueva Función'">
+      [header]="esEdicion ? 'Editar Función' : 'Nueva Función'"
+      (onHide)="onHideDialog()">
       
-      <div class="formularioSimple">
-        <p>Funcionalidad de formulario temporalmente deshabilitada.</p>
-        <p>Se requiere instalar módulos adicionales de PrimeNG.</p>
-      </div>
-  
+      <form (ngSubmit)="guardarFuncion()" #formFuncion="ngForm">
+        <div class="formularioFuncion">
+          
+          <!-- Película -->
+          <div class="campoFormulario">
+            <label for="id_peli">Película *</label>
+            <p-select 
+              id="id_peli"
+              [options]="listaPeliculas" 
+              [(ngModel)]="funcionSeleccionada.id_peli" 
+              name="id_peli"
+              optionLabel="nombre"
+              optionValue="id"
+              placeholder="Selecciona una película"
+              [class]="{'ng-invalid ng-dirty': submitted && !funcionSeleccionada.id_peli}">
+            </p-select>
+            <small 
+              class="errorValidacion" 
+              *ngIf="submitted && !funcionSeleccionada.id_peli">
+              La película es requerida
+            </small>
+          </div>
+
+          <!-- Sala -->
+          <div class="campoFormulario">
+            <label for="id_sala">Sala *</label>
+            <p-select 
+              id="id_sala"
+              [options]="listaSalas" 
+              [(ngModel)]="funcionSeleccionada.id_sala" 
+              name="id_sala"
+              optionLabel="nombre"
+              optionValue="id"
+              placeholder="Selecciona una sala"
+              [class]="{'ng-invalid ng-dirty': submitted && !funcionSeleccionada.id_sala}">
+            </p-select>
+            <small 
+              class="errorValidacion" 
+              *ngIf="submitted && !funcionSeleccionada.id_sala">
+              La sala es requerida
+            </small>
+          </div>
+
+          <!-- Fecha y Hora Inicio -->
+          <div class="campoFormulario">
+            <label for="fecha_hora_inicio">Fecha y Hora Inicio *</label>
+            <p-calendar
+              id="fecha_hora_inicio"
+              [(ngModel)]="funcionSeleccionada.fecha_hora_inicio" 
+              name="fecha_hora_inicio"
+              showTime="true"
+              showIcon="true"
+              dateFormat="dd/mm/yy"
+              hourFormat="24"
+              placeholder="Selecciona fecha y hora"
+              [class]="{'ng-invalid ng-dirty': submitted && !funcionSeleccionada.fecha_hora_inicio}">
+            </p-calendar>
+            <small 
+              class="errorValidacion" 
+              *ngIf="submitted && !funcionSeleccionada.fecha_hora_inicio">
+              La fecha y hora de inicio son requeridas
+            </small>
+          </div>
+
+        </div>
+      </form>
+
+      <!-- Footer del diálogo -->
       <ng-template pTemplate="footer">
         <button 
           pButton 
-          label="Cerrar" 
+          label="Cancelar" 
           icon="pi pi-times" 
           class="p-button-text"
-          (click)="mostrarDialogoEdicion = false">
+          type="button"
+          (click)="cancelarFormulario()">
+        </button>
+        
+        <button 
+          pButton 
+          [label]="esEdicion ? 'Actualizar Función' : 'Crear Función'" 
+          [icon]="esEdicion ? 'pi pi-check' : 'pi pi-plus'" 
+          class="p-button-primary"
+          type="button"
+          (click)="guardarFuncion()">
         </button>
       </ng-template>
     </p-dialog>
-  </div>
-  <app-footer></app-footer>
+</div>
+<app-footer></app-footer>

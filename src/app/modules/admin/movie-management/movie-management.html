@@ -30,7 +30,7 @@
         [paginator]="true" 
         [rows]="10"
         [rowsPerPageOptions]="[5, 10, 20, 50]"
-        [globalFilterFields]="['titulo', 'director', 'genero']"
+        [globalFilterFields]="['nombre', 'director']"
         styleClass="p-datatable-striped p-datatable-gridlines"
         dataKey="id">
         
@@ -38,7 +38,7 @@
         <ng-template pTemplate="header">
           <tr>
             <th style="width: 300px">Película</th>
-            <th>Género</th>
+            <th>Categorías</th>
             <th>Duración</th>
             <th>Clasificación</th>
             <th>Estado</th>
@@ -66,23 +66,22 @@
             <td>
               <div class="infoPelicula">
                 <img 
-                  [src]="pelicula.imagenPortada" 
-                  [alt]="pelicula.titulo"
+                  [src]="pelicula.imagen" 
+                  [alt]="pelicula.nombre"
                   class="imagenPelicula"
-                  (error)="pelicula.imagenPortada = 'assets/images/pelicula-placeholder.jpg'">
+                  (error)="pelicula.imagen = 'assets/images/pelicula-placeholder.jpg'">
                 
                 <div class="detallesPelicula">
-                  <h4 class="tituloPelicula">{{ pelicula.titulo }}</h4>
-                  <p class="directorPelicula">{{ pelicula.director }}</p>
-                  <p class="precioPelicula">${{ pelicula.precio }}</p>
+                  <h4 class="tituloPelicula">{{ pelicula.nombre }}</h4>
+                  <p class="directorPelicula">{{ pelicula.director || 'Sin director' }}</p>
                 </div>
               </div>
             </td>
   
-            <!-- Columna Género -->
+            <!-- Columna Categorías -->
             <td>
               <span class="generosLista">
-                {{ formatearGeneros(pelicula.genero) }}
+                {{ formatearCategorias(pelicula.categorias) }}
               </span>
             </td>
   
@@ -97,8 +96,8 @@
             <td>
               <span 
                 class="badgeClasificacion"
-                [class]="'clasificacion-' + pelicula.clasificacion.toLowerCase()">
-                {{ pelicula.clasificacion }}
+                [class]="'clasificacion-' + (pelicula.clasificacion || 'A').toLowerCase()">
+                {{ pelicula.clasificacion || 'A' }}
               </span>
             </td>
   
@@ -113,7 +112,7 @@
             <!-- Columna Fecha Estreno -->
             <td>
               <span class="fechaEstreno">
-                {{ pelicula.fechaEstreno | date:'dd/MM/yyyy' }}
+                {{ pelicula.fecha_estreno | date:'dd/MM/yyyy' }}
               </span>
             </td>
   
@@ -133,13 +132,9 @@
                 <!-- Botón Cambiar Estado -->
                 <button 
                   pButton 
-                  [icon]="pelicula.estado === 'activa' ? 'pi pi-pause' : 'pi pi-play'" 
-                  class="p-button-rounded p-button-text p-button-sm"
-                  [ngClass]="{
-                    'botonDesactivar': pelicula.estado === 'activa',
-                    'botonActivar': pelicula.estado !== 'activa'
-                  }"
-                  [pTooltip]="pelicula.estado === 'activa' ? 'Desactivar' : 'Activar'"
+                  icon="pi pi-sync" 
+                  class="p-button-rounded p-button-text p-button-sm p-button-warning"
+                  pTooltip="Cambiar estado"
                   tooltipPosition="top"
                   (click)="cambiarEstadoPelicula(pelicula)">
                 </button>
@@ -181,279 +176,213 @@
     </div>
   
     <!-- Diálogo de Edición/Creación -->
-    <p-dialog 
-      [(visible)]="mostrarDialogoEdicion" 
-      [style]="{ width: '90vw', maxWidth: '800px' }"
-      [modal]="true" 
-      [closable]="true"
-      [draggable]="false"
-      [resizable]="false"
-      [header]="esEdicion ? 'Editar Película' : 'Nueva Película'">
-      
-      <form (ngSubmit)="guardarPelicula()" #formPelicula="ngForm">
-        <div class="formularioPelicula">
-          
-          <!-- Sección Información Básica -->
-          <div class="seccionFormulario">
-            <h3 class="tituloSeccion">Información Básica</h3>
-            
-            <div class="campoFormulario">
-              <label for="titulo">Título *</label>
-              <input 
-                id="titulo"
-                type="text" 
-                pInputText 
-                [(ngModel)]="peliculaSeleccionada.titulo" 
-                name="titulo"
-                placeholder="Ingresa el título de la película"
-                [class]="{'ng-invalid ng-dirty': submitted && !peliculaSeleccionada.titulo}" />
-              <small 
-                class="errorValidacion" 
-                *ngIf="submitted && !peliculaSeleccionada.titulo">
-                El título es requerido
-              </small>
-            </div>
-  
-            <div class="campoFormulario">
-              <label for="descripcion">Descripción *</label>
-              <textarea 
-                id="descripcion"
-                pInputTextarea 
-                [(ngModel)]="peliculaSeleccionada.descripcion" 
-                name="descripcion"
-                [rows]="4"
-                placeholder="Describe la trama de la película..."
-                [class]="{'ng-invalid ng-dirty': submitted && !peliculaSeleccionada.descripcion}">
-              </textarea>
-              <small 
-                class="errorValidacion" 
-                *ngIf="submitted && !peliculaSeleccionada.descripcion">
-                La descripción es requerida
-              </small>
-            </div>
-  
-            <div class="camposGrid">
-              <div class="campoFormulario">
-                <label for="duracion">Duración (minutos) *</label>
-                <input 
-                  id="duracion"
-                  type="number" 
-                  pInputText 
-                  [(ngModel)]="peliculaSeleccionada.duracion" 
-                  name="duracion"
-                  min="1"
-                  placeholder="120" />
-              </div>
-  
-              <div class="campoFormulario">
-                <label for="precio">Precio ($) *</label>
-                <input 
-                  id="precio"
-                  type="number" 
-                  pInputText 
-                  [(ngModel)]="peliculaSeleccionada.precio" 
-                  name="precio"
-                  min="0"
-                  step="0.5"
-                  placeholder="8.50" />
-              </div>
-            </div>
-          </div>
-  
-          <!-- Sección Clasificación y Géneros -->
-          <div class="seccionFormulario">
-            <h3 class="tituloSeccion">Clasificación y Géneros</h3>
-            
-            <div class="camposGrid">
-              <div class="campoFormulario">
-                <label for="clasificacion">Clasificación *</label>
-                <p-select 
-                  id="clasificacion"
-                  [options]="opcionesClasificacion" 
-                  [(ngModel)]="peliculaSeleccionada.clasificacion" 
-                  name="clasificacion"
-                  placeholder="Selecciona clasificación"
-                  [class]="{'ng-invalid ng-dirty': submitted && !peliculaSeleccionada.clasificacion}">
-                </p-select>
-                <small 
-                  class="errorValidacion" 
-                  *ngIf="submitted && !peliculaSeleccionada.clasificacion">
-                  La clasificación es requerida
-                </small>
-              </div>
-  
-              <div class="campoFormulario">
-                <label for="estado">Estado</label>
-                <p-select 
-                  id="estado"
-                  [options]="opcionesEstados" 
-                  [(ngModel)]="peliculaSeleccionada.estado" 
-                  name="estado">
-                </p-select>
-              </div>
-            </div>
-  
-            <div class="campoFormulario">
-              <label for="generos">Géneros *</label>
-              <p-multiselect 
-                id="generos"
-                [options]="opcionesGeneros" 
-                [(ngModel)]="peliculaSeleccionada.genero" 
-                name="generos"
-                placeholder="Selecciona géneros"
-                [class]="{'ng-invalid ng-dirty': submitted && peliculaSeleccionada.genero.length === 0}">
-              </p-multiselect>
-              <small 
-                class="errorValidacion" 
-                *ngIf="submitted && peliculaSeleccionada.genero.length === 0">
-                Al menos un género es requerido
-              </small>
-            </div>
-          </div>
-  
-          <!-- Sección Elenco y Fechas -->
-          <div class="seccionFormulario">
-            <h3 class="tituloSeccion">Elenco y Fechas</h3>
-            
-            <div class="campoFormulario">
-              <label for="director">Director *</label>
-              <input 
-                id="director"
-                type="text" 
-                pInputText 
-                [(ngModel)]="peliculaSeleccionada.director" 
-                name="director"
-                placeholder="Nombre del director"
-                [class]="{'ng-invalid ng-dirty': submitted && !peliculaSeleccionada.director}" />
-              <small 
-                class="errorValidacion" 
-                *ngIf="submitted && !peliculaSeleccionada.director">
-                El director es requerido
-              </small>
-            </div>
-  
-            <div class="campoFormulario">
-              <label for="actores">Actores (separados por coma)</label>
-              <input 
-                id="actores"
-                type="text" 
-                pInputText 
-                [(ngModel)]="peliculaSeleccionada.actores" 
-                name="actores"
-                placeholder="Actor 1, Actor 2, Actor 3..." />
-            </div>
-  
-            <div class="camposGrid">
-              <div class="campoFormulario">
-                <label for="fechaEstreno">Fecha Estreno *</label>
-                <p-datepicker 
-                  id="fechaEstreno"
-                  [(ngModel)]="peliculaSeleccionada.fechaEstreno" 
-                  name="fechaEstreno"
-                  [showIcon]="true"
-                  dateFormat="dd/mm/yy"
-                  [class]="{'ng-invalid ng-dirty': submitted && !peliculaSeleccionada.fechaEstreno}">
-                </p-datepicker>
-                <small 
-                  class="errorValidacion" 
-                  *ngIf="submitted && !peliculaSeleccionada.fechaEstreno">
-                  La fecha de estreno es requerida
-                </small>
-              </div>
-  
-              <div class="campoFormulario">
-                <label for="fechaFin">Fecha Fin</label>
-                <p-datepicker 
-                  id="fechaFin"
-                  [(ngModel)]="peliculaSeleccionada.fechaFin" 
-                  name="fechaFin"
-                  [showIcon]="true"
-                  dateFormat="dd/mm/yy">
-                </p-datepicker>
-              </div>
-            </div>
-          </div>
-  
-          <!-- Sección Multimedia -->
-          <div class="seccionFormulario">
-            <h3 class="tituloSeccion">Multimedia</h3>
-            
-            <div class="camposGrid">
-              <div class="campoFormulario">
-                <label>Imagen de Portada</label>
-                <p-fileUpload 
-                  mode="basic" 
-                  chooseLabel="Seleccionar"
-                  accept="image/*"
-                  (onSelect)="onUploadImagen($event, 'portada')"
-                  [maxFileSize]="1000000">
-                </p-fileUpload>
-                <small class="ayudaCampo">Tamaño máximo: 1MB</small>
-              </div>
-  
-              <div class="campoFormulario">
-                <label>Imagen de Banner</label>
-                <p-fileUpload 
-                  mode="basic" 
-                  chooseLabel="Seleccionar"
-                  accept="image/*"
-                  (onSelect)="onUploadImagen($event, 'banner')"
-                  [maxFileSize]="2000000">
-                </p-fileUpload>
-                <small class="ayudaCampo">Tamaño máximo: 2MB</small>
-              </div>
-            </div>
-  
-            <div class="campoFormulario">
-              <label for="trailer">URL del Trailer</label>
-              <input 
-                id="trailer"
-                type="url" 
-                pInputText 
-                [(ngModel)]="peliculaSeleccionada.trailerUrl" 
-                name="trailer"
-                placeholder="https://youtube.com/..." />
-            </div>
-          </div>
-        </div>
-  
-        <!-- Footer del diálogo -->
-      <!-- Reemplaza la sección del footer del diálogo en movie-management.html -->
+  <!-- Diálogo de Edición/Creación -->
+<p-dialog 
+[(visible)]="mostrarDialogoEdicion" 
+[style]="{ width: '90vw', maxWidth: '800px' }"
+[modal]="true" 
+[closable]="true"
+[draggable]="false"
+[resizable]="false"
+[header]="esEdicion ? 'Editar Película' : 'Nueva Película'"
+(onHide)="onHideDialog()">
 
-<!-- Footer del diálogo con botones Guardar y Cancelar -->
-<ng-template pTemplate="footer">
-    <div class="footerFormulario">
-      <button 
-        pButton 
-        label="Cancelar" 
-        icon="pi pi-times" 
-        class="p-button-text botonCancelar"
-        type="button"
-        (click)="cancelarFormulario()">
-      </button>
+<form (ngSubmit)="guardarPelicula()" #formPelicula="ngForm">
+  <div class="formularioPelicula">
+    
+    <!-- Sección Información Básica -->
+    <div class="seccionFormulario">
+      <h3 class="tituloSeccion">Información Básica</h3>
       
-      <div class="accionesDerecha">
-        <button 
-          pButton 
-          label="Guardar Borrador" 
-          icon="pi pi-save" 
-          class="p-button-secondary botonBorrador"
-          type="button"
-        
-          *ngIf="esEdicion">
-        </button>
-        
-        <button 
-          pButton 
-          [label]="esEdicion ? 'Actualizar Película' : 'Crear Película'" 
-          [icon]="esEdicion ? 'pi pi-check' : 'pi pi-plus'" 
-          class="p-button-primary botonGuardar"
-          type="submit">
-        </button>
+      <div class="campoFormulario">
+        <label for="nombre">Nombre *</label>
+        <input 
+          id="nombre"
+          type="text" 
+          pInputText 
+          [(ngModel)]="peliculaSeleccionada.nombre" 
+          name="nombre"
+          placeholder="Ingresa el nombre de la película"
+          [class]="{'ng-invalid ng-dirty': submitted && !peliculaSeleccionada.nombre}" />
+        <small 
+          class="errorValidacion" 
+          *ngIf="submitted && !peliculaSeleccionada.nombre">
+          El nombre es requerido
+        </small>
+      </div>
+
+      <div class="campoFormulario">
+        <label for="descripcion">Descripción *</label>
+        <textarea 
+          id="descripcion"
+          pInputTextarea 
+          [(ngModel)]="peliculaSeleccionada.descripcion" 
+          name="descripcion"
+          [rows]="4"
+          placeholder="Describe la trama de la película..."
+          [class]="{'ng-invalid ng-dirty': submitted && !peliculaSeleccionada.descripcion}">
+        </textarea>
+        <small 
+          class="errorValidacion" 
+          *ngIf="submitted && !peliculaSeleccionada.descripcion">
+          La descripción es requerida
+        </small>
+      </div>
+
+      <div class="camposGrid">
+        <div class="campoFormulario">
+          <label for="duracion">Duración (minutos) *</label>
+          <input 
+            id="duracion"
+            type="number" 
+            pInputText 
+            [(ngModel)]="peliculaSeleccionada.duracion" 
+            name="duracion"
+            min="1"
+            placeholder="120" />
+        </div>
+
+        <div class="campoFormulario">
+          <label for="director">Director</label>
+          <input 
+            id="director"
+            type="text" 
+            pInputText 
+            [(ngModel)]="peliculaSeleccionada.director" 
+            name="director"
+            placeholder="Nombre del director" />
+        </div>
       </div>
     </div>
-  </ng-template>
-      </form>
-    </p-dialog>
+
+    <!-- Sección Clasificación y Categorías -->
+    <div class="seccionFormulario">
+      <h3 class="tituloSeccion">Clasificación y Categorías</h3>
+      
+      <div class="camposGrid">
+        <div class="campoFormulario">
+          <label for="clasificacion">Clasificación</label>
+          <p-select 
+            id="clasificacion"
+            [options]="opcionesClasificacion" 
+            [(ngModel)]="peliculaSeleccionada.clasificacion" 
+            name="clasificacion"
+            placeholder="Selecciona clasificación">
+          </p-select>
+        </div>
+
+        <div class="campoFormulario">
+          <label for="estado">Estado *</label>
+          <p-select 
+            id="estado"
+            [options]="opcionesEstados" 
+            [(ngModel)]="peliculaSeleccionada.estado" 
+            name="estado">
+          </p-select>
+        </div>
+      </div>
+
+      <div class="campoFormulario">
+        <label for="categorias">Categorías *</label>
+        <p-multiSelect 
+          id="categorias"
+          [options]="opcionesCategorias" 
+          [(ngModel)]="peliculaSeleccionada.categorias" 
+          name="categorias"
+          placeholder="Selecciona categorías"
+          [class]="{'ng-invalid ng-dirty': submitted && peliculaSeleccionada.categorias.length === 0}">
+        </p-multiSelect>
+        <small 
+          class="errorValidacion" 
+          *ngIf="submitted && peliculaSeleccionada.categorias.length === 0">
+          Al menos una categoría es requerida
+        </small>
+      </div>
+    </div>
+
+    <!-- Sección Elenco y Fechas -->
+    <div class="seccionFormulario">
+      <h3 class="tituloSeccion">Elenco y Fechas</h3>
+      
+      <div class="campoFormulario">
+        <label for="autores">Actores (separados por coma)</label>
+        <input 
+          id="autores"
+          type="text" 
+          pInputText 
+          [(ngModel)]="peliculaSeleccionada.autores" 
+          name="autores"
+          placeholder="Actor 1, Actor 2, Actor 3..." />
+      </div>
+
+      <div class="campoFormulario">
+        <label for="fecha_estreno">Fecha Estreno *</label>
+        <p-calendar
+          id="fecha_estreno"
+          [(ngModel)]="peliculaSeleccionada.fecha_estreno" 
+          name="fecha_estreno"
+          dateFormat="dd/mm/yy"
+          inputId="fecha_estreno_input"
+          [class]="{'ng-invalid ng-dirty': submitted && !peliculaSeleccionada.fecha_estreno}">
+        </p-calendar>
+        <small 
+          class="errorValidacion" 
+          *ngIf="submitted && !peliculaSeleccionada.fecha_estreno">
+          La fecha de estreno es requerida
+        </small>
+      </div>
+    </div>
+
+    <!-- Sección Multimedia -->
+    <div class="seccionFormulario">
+      <h3 class="tituloSeccion">Multimedia</h3>
+      
+      <div class="campoFormulario">
+        <label>Imagen de Portada</label>
+        <p-fileUpload 
+          mode="basic" 
+          chooseLabel="Seleccionar"
+          accept="image/*"
+          (onSelect)="onUploadImagen($event)"
+          [maxFileSize]="1000000">
+        </p-fileUpload>
+        <small class="ayudaCampo">Tamaño máximo: 1MB</small>
+      </div>
+
+      <div class="campoFormulario">
+        <label for="url_trailer">URL del Trailer</label>
+        <input 
+          id="url_trailer"
+          type="url" 
+          pInputText 
+          [(ngModel)]="peliculaSeleccionada.url_trailer" 
+          name="url_trailer"
+          placeholder="https://youtube.com/..." />
+      </div>
+    </div>
   </div>
-  <app-footer></app-footer>
+</form>
+
+<!-- FOOTER DEL DIÁLOGO - FUERA DEL FORM -->
+<ng-template pTemplate="footer">
+  <button 
+    pButton 
+    label="Cancelar" 
+    icon="pi pi-times" 
+    class="p-button-text"
+    type="button"
+    (click)="cancelarFormulario()">
+  </button>
+  
+  <button 
+    pButton 
+    [label]="esEdicion ? 'Actualizar Película' : 'Crear Película'" 
+    [icon]="esEdicion ? 'pi pi-check' : 'pi pi-plus'" 
+    class="p-button-primary"
+    type="button"
+    (click)="guardarPelicula()">
+  </button>
+</ng-template>
+</p-dialog>
+</div>
+<app-footer></app-footer>
