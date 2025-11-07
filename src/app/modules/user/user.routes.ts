@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 
 export const routesUser: Routes = [
-    // {
-    //     path: 'auth',
-    //     loadComponent: () => import('./login/login.ts').then(m => m.routesAuth)
-    // },
+    {
+        path: 'cartelera',
+        loadComponent: () => import('./cartelera/cartelera').then(m => m.Cartelera)
+    },
 ];
