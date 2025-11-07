@@ -1,1 +1,62 @@
-<p>historial-reservas works!</p>
+<app-header></app-header>
+<div class="boleto-container">
+  <div *ngFor="let reserva of reservas" class="boleto-wrapper">
+    <!-- Stub Izquierdo -->
+    <div class="boleto-stub-left">
+      <span class="boleto-numero-vertical">#{{ reserva.id | number:'6.0-0' }}</span>
+    </div>
+
+    <!-- Cuerpo Principal del Boleto -->
+    <div class="boleto-cine">
+      <!-- Fila Superior: Clasificación, Fecha, Hora -->
+      <div class="boleto-fila-superior">
+        
+        <div class="boleto-info-item">
+          <span class="boleto-label">FECHA:</span>
+          <span class="boleto-value">{{ formatearFecha(reserva.fechaFuncion) }}</span>
+        </div>
+        <div class="boleto-info-item">
+          <span class="boleto-label">HORA:</span>
+          <span class="boleto-value">{{ reserva.horarioFuncion }} HORAS</span>
+        </div>
+      </div>
+
+      <!-- Sección Central: Título y Película -->
+      <div class="boleto-seccion-central">
+        <div class="boleto-claqueta">🎬</div>
+        <div class="boleto-titulo-cine">
+          <h2 class="boleto-nombre-cine">CINE ULEAM</h2>
+          <h3 class="boleto-titulo-pelicula">{{ reserva.tituloPelicula }}</h3>
+          <p class="boleto-mensaje-estreno">¡DISFRUTA ESTE GRAN ESTRENO!</p>
+        </div>
+        <div class="boleto-claqueta">🎬</div>
+      </div>
+
+      <!-- Fila Inferior: Sala, Asiento, Costo -->
+      <div class="boleto-fila-inferior">
+        <div class="boleto-info-item">
+          <span class="boleto-label">SALA:</span>
+          <span class="boleto-value">{{ reserva.codigoSala }}</span>
+        </div>
+        <div class="boleto-info-item">
+          <span class="boleto-label">ASIENTO:</span>
+          <span class="boleto-value">
+            <ng-container *ngFor="let asiento of reserva.asientos; let last = last">
+              {{ asiento.fila }}{{ asiento.numero }}<span *ngIf="!last">, </span>
+            </ng-container>
+          </span>
+        </div>
+        <div class="boleto-info-item">
+          <span class="boleto-label">COSTO:</span>
+          <span class="boleto-value">${{ formatearCosto(reserva.costo || calcularCosto(reserva.asientos.length)) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stub Derecho -->
+    <div class="boleto-stub-right">
+      <span class="boleto-numero-vertical-right">#{{ reserva.id | number:'6.0-0' }}</span>
+    </div>
+  </div>
+</div>
+<app-footer></app-footer>

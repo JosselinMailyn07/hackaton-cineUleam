@@ -1,0 +1,193 @@
+@use 'tailwindcss' as *;
+
+// Contenedor con fondo de rayas diagonales
+.boleto-container {
+  @apply p-6 space-y-8;
+  background: repeating-linear-gradient(
+    45deg,
+    #000 0px,
+    #000 20px,
+    #fff 20px,
+    #fff 40px
+  );
+  min-height: 100vh;
+}
+
+// Wrapper del boleto completo
+.boleto-wrapper {
+  @apply flex items-stretch max-w-4xl mx-auto;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+// Stub izquierdo
+.boleto-stub-left {
+  @apply bg-[#f5f5dc] border-r-2 border-black flex items-center justify-center;
+  width: 50px;
+  min-height: 250px;
+  position: relative;
+  padding: 10px 5px;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: repeating-linear-gradient(
+      45deg,
+      #000 0px,
+      #000 20px,
+      #fff 20px,
+      #fff 40px
+    );
+    z-index: 1;
+  }
+}
+
+// Stub derecho
+.boleto-stub-right {
+  @apply bg-[#f5f5dc] border-l-2 border-dashed border-black flex items-center justify-center;
+  width: 50px;
+  min-height: 250px;
+  position: relative;
+  padding: 10px 5px;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: repeating-linear-gradient(
+      45deg,
+      #000 0px,
+      #000 20px,
+      #fff 20px,
+      #fff 40px
+    );
+    z-index: 1;
+  }
+}
+
+// Número vertical en stub izquierdo (rotado 90° antihorario)
+.boleto-numero-vertical {
+  @apply text-black font-bold text-xs;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  letter-spacing: 2px;
+}
+
+// Número vertical en stub derecho (rotado 90° horario)
+.boleto-numero-vertical-right {
+  @apply text-black font-bold text-xs;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 2px;
+}
+
+// Cuerpo principal del boleto
+.boleto-cine {
+  @apply bg-[#f5f5dc] flex-1 p-6;
+  position: relative;
+  // Patrón sutil de "L" repetidas
+  background-image: 
+    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 8px,
+      rgba(0, 0, 0, 0.02) 8px,
+      rgba(0, 0, 0, 0.02) 9px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 8px,
+      rgba(0, 0, 0, 0.02) 8px,
+      rgba(0, 0, 0, 0.02) 9px
+    );
+  background-size: 16px 16px, 16px 16px, 16px 16px, 16px 16px;
+  background-position: 0 0, 0 0, 0 0, 0 0;
+}
+
+// Fila superior (Clasificación, Fecha, Hora)
+.boleto-fila-superior {
+  @apply flex justify-between items-center mb-6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 8px;
+}
+
+// Fila inferior (Sala, Asiento, Costo)
+.boleto-fila-inferior {
+  @apply flex justify-between items-center mt-6;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 8px;
+}
+
+// Item de información
+.boleto-info-item {
+  @apply flex flex-col;
+  flex: 1;
+  text-align: center;
+}
+
+.boleto-label {
+  @apply text-xs text-black font-bold uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.boleto-value {
+  @apply text-sm text-black font-bold;
+}
+
+// Sección central con título y película
+.boleto-seccion-central {
+  @apply flex items-center justify-center my-8;
+  gap: 20px;
+}
+
+.boleto-claqueta {
+  @apply text-3xl;
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.boleto-titulo-cine {
+  @apply text-center flex-1;
+}
+
+.boleto-nombre-cine {
+  @apply text-3xl font-black text-black uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  font-family: sans-serif;
+  font-weight: 900;
+}
+
+.boleto-titulo-pelicula {
+  @apply text-xl font-bold text-black uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  font-family: sans-serif;
+  font-weight: 700;
+}
+
+.boleto-mensaje-estreno {
+  @apply text-sm text-black italic uppercase;
+  letter-spacing: 1.5px;
+  font-family: sans-serif;
+  font-style: italic;
+  margin-top: 4px;
+}
