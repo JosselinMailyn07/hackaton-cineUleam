@@ -54,8 +54,6 @@ export class HeaderComponent implements OnInit {
   // Datos de ejemplo
   itemsNavegacion = [
     { texto: 'Cartelera', icono: 'pi pi-play', ruta: '/user/cartelera' },
-    { texto: 'Estrenos', icono: 'pi pi-star', ruta: '/estrenos' },
-    { texto: 'Próximamente', icono: 'pi pi-calendar', ruta: '/proximamente' },
     { texto: 'Alquiler', icono: 'pi pi-calendar', ruta: '/user/alquiler' },
   ];
 

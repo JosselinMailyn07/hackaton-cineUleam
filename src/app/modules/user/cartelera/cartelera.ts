@@ -29,6 +29,7 @@ export class Cartelera implements OnInit {
   
   peliculasEnCartelera: any[] = [];
   peliculasProximas: any[] = [];
+  peliculasEstrenos: any[] = [];
   
   cargando: boolean = true;
   mostrarModalHorarios: boolean = false;
@@ -89,17 +90,22 @@ export class Cartelera implements OnInit {
         };
       });
 
-      // 6. Filtra las películas procesadas
+      // 6. Filtra las películas procesadas en tres categorías
       this.peliculasEnCartelera = processedMovies.filter(
         (p: any) => p.estado === 'cartelera'
       );
       
       this.peliculasProximas = processedMovies.filter(
-        (p: any) => p.estado === 'proximamente' || p.estado === 'estreno'
+        (p: any) => p.estado === 'proximamente'
+      );
+
+      this.peliculasEstrenos = processedMovies.filter(
+        (p: any) => p.estado === 'estreno'
       );
 
       console.log('En cartelera:', this.peliculasEnCartelera);
-      console.log('Próximas:', this.peliculasProximas);
+      console.log('Próximamente:', this.peliculasProximas);
+      console.log('Estrenos:', this.peliculasEstrenos);
 
     } catch (error) {
       console.error('Error cargando datos:', error);
